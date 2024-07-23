@@ -7,21 +7,21 @@ typedef uint8_t u8;
 
 // LCD重要参数集
 typedef struct {
-  u16 width;   // LCD 宽度
-  u16 height;  // LCD 高度
-  u16 id;      // LCD ID
-  u8 dir;      // 横屏还是竖屏控制：0，竖屏；1，横屏。
-  u16 wramcmd; // 开始写gram指令
-  u16 setxcmd; // 设置x坐标指令
-  u16 setycmd; // 设置y坐标指令
+    u16 width;   // LCD 宽度
+    u16 height;  // LCD 高度
+    u16 id;      // LCD ID
+    u8 dir;      // 横屏还是竖屏控制：0，竖屏；1，横屏。
+    u16 wramcmd; // 开始写gram指令
+    u16 setxcmd; // 设置x坐标指令
+    u16 setycmd; // 设置y坐标指令
 } _lcd_dev;
 
 // LCD参数
 extern _lcd_dev lcddev; // 管理LCD重要参数
 /////////////////////////////////////用户配置区///////////////////////////////////
-#define USE_HORIZONTAL                                                         \
-  0 // 定义液晶屏顺时针旋转方向
-    // 0-0度旋转，1-90度旋转，2-180度旋转，3-270度旋转
+#define USE_HORIZONTAL \
+    0 // 定义液晶屏顺时针旋转方向
+      // 0-0度旋转，1-90度旋转，2-180度旋转，3-270度旋转
 
 //////////////////////////////////////////////////////////////////////////////////
 // 定义LCD的尺寸
@@ -84,4 +84,10 @@ void LCD_SetParam(void);
 void Lcd_WriteData_16Bit(u16 Data);
 void LCD_direction(u8 direction);
 void LCD_Show_String(u16 x, u16 y, char *str);
+
+extern char sudoer_str_tmp[256];
+
+void lcd_log(char* str,...);
+void sudoer_LCD_console_print();
+
 #endif

@@ -1,7 +1,8 @@
 #include "lcd.h"
 #include "driver/softspi.h"
 #include "ti_msp_dl_config.h"
-
+#include <stdarg.h>
+#include <stdio.h>
 #define LCD_CS_SET
 
 #define LCD_RS_SET DL_GPIO_setPins(TFT_DC_RS_PORT, TFT_DC_RS_PIN)
@@ -14,6 +15,7 @@
 
 #define LCD_RST_CLR DL_GPIO_clearPins(TFT_RESET_PORT, TFT_RESET_PIN)
 
+char sudoer_str_tmp[256];
 // 管理LCD重要参数
 // 默认为竖屏
 _lcd_dev lcddev;
@@ -30,11 +32,11 @@ u16 DeviceCode;
  * @retvalue   :None
  ******************************************************************************/
 void LCD_WR_REG(u8 data) {
-  LCD_CS_CLR;
-  LCD_RS_CLR;
-  // SPI_WriteByte(SPI1, data);
-  softspi_writedata(data);
-  LCD_CS_SET;
+    LCD_CS_CLR;
+    LCD_RS_CLR;
+    // SPI_WriteByte(SPI1, data);
+    softspi_writedata(data);
+    LCD_CS_SET;
 }
 
 /*****************************************************************************
@@ -45,11 +47,11 @@ void LCD_WR_REG(u8 data) {
  * @retvalue   :None
  ******************************************************************************/
 void LCD_WR_DATA(u8 data) {
-  LCD_CS_CLR;
-  LCD_RS_SET;
-  softspi_writedata(data);
+    LCD_CS_CLR;
+    LCD_RS_SET;
+    softspi_writedata(data);
 
-  LCD_CS_SET;
+    LCD_CS_SET;
 }
 
 /*****************************************************************************
@@ -61,8 +63,8 @@ void LCD_WR_DATA(u8 data) {
  * @retvalue   :None
 ******************************************************************************/
 void LCD_WriteReg(u8 LCD_Reg, u16 LCD_RegValue) {
-  LCD_WR_REG(LCD_Reg);
-  LCD_WR_DATA(LCD_RegValue);
+    LCD_WR_REG(LCD_Reg);
+    LCD_WR_DATA(LCD_RegValue);
 }
 
 /*****************************************************************************
@@ -72,7 +74,9 @@ void LCD_WriteReg(u8 LCD_Reg, u16 LCD_RegValue) {
  * @parameters :None
  * @retvalue   :None
  ******************************************************************************/
-void LCD_WriteRAM_Prepare(void) { LCD_WR_REG(lcddev.wramcmd); }
+void LCD_WriteRAM_Prepare(void) {
+    LCD_WR_REG(lcddev.wramcmd);
+}
 
 /*****************************************************************************
  * @name       :void Lcd_WriteData_16Bit(u16 Data)
@@ -82,10 +86,10 @@ void LCD_WriteRAM_Prepare(void) { LCD_WR_REG(lcddev.wramcmd); }
  * @retvalue   :None
  ******************************************************************************/
 void Lcd_WriteData_16Bit(u16 Data) {
-  // 18Bit
-  LCD_WR_DATA((Data >> 8) & 0xF8); // RED
-  LCD_WR_DATA((Data >> 3) & 0xFC); // GREEN
-  LCD_WR_DATA(Data << 3);          // BLUE
+    // 18Bit
+    LCD_WR_DATA((Data >> 8) & 0xF8); // RED
+    LCD_WR_DATA((Data >> 3) & 0xFC); // GREEN
+    LCD_WR_DATA(Data << 3);          // BLUE
 }
 
 /*****************************************************************************
@@ -97,8 +101,8 @@ void Lcd_WriteData_16Bit(u16 Data) {
  * @retvalue   :None
 ******************************************************************************/
 void LCD_DrawPoint(u16 x, u16 y) {
-  LCD_SetCursor(x, y); // 设置光标位置
-  Lcd_WriteData_16Bit(POINT_COLOR);
+    LCD_SetCursor(x, y); // 设置光标位置
+    Lcd_WriteData_16Bit(POINT_COLOR);
 }
 
 /*****************************************************************************
@@ -109,16 +113,16 @@ void LCD_DrawPoint(u16 x, u16 y) {
  * @retvalue   :None
  ******************************************************************************/
 void LCD_Clear(u16 Color) {
-  unsigned int i, m;
-  LCD_SetWindows(0, 0, lcddev.width - 1, lcddev.height - 1);
-  LCD_CS_CLR;
-  LCD_RS_SET;
-  for (i = 0; i < lcddev.height; i++) {
-    for (m = 0; m < lcddev.width; m++) {
-      Lcd_WriteData_16Bit(Color);
+    unsigned int i, m;
+    LCD_SetWindows(0, 0, lcddev.width - 1, lcddev.height - 1);
+    LCD_CS_CLR;
+    LCD_RS_SET;
+    for (i = 0; i < lcddev.height; i++) {
+        for (m = 0; m < lcddev.width; m++) {
+            Lcd_WriteData_16Bit(Color);
+        }
     }
-  }
-  LCD_CS_SET;
+    LCD_CS_SET;
 }
 
 /*****************************************************************************
@@ -129,11 +133,11 @@ void LCD_Clear(u16 Color) {
  * @retvalue   :None
  ******************************************************************************/
 void LCD_RESET(void) {
-  LCD_RST_CLR;
-  // delay_ms(100);
-  delay_cycles(7200000);
-  LCD_RST_SET;
-  delay_cycles(3600000);
+    LCD_RST_CLR;
+    // delay_ms(100);
+    delay_cycles(7200000);
+    LCD_RST_SET;
+    delay_cycles(3600000);
 }
 
 /*****************************************************************************
@@ -144,83 +148,83 @@ void LCD_RESET(void) {
  * @retvalue   :None
  ******************************************************************************/
 void LCD_Init(void) {
-  // SPI1_Init(); // 硬件SPI初始化
-  //	SPI_SetSpeed(SPI1,SPI_BaudRatePrescaler_2);
-  // LCD_GPIOInit(); // LCD GPIO初始化
-  LCD_RESET(); // LCD 复位
-  //************* ILI9488初始化**********//
-  LCD_WR_REG(0XF7);
-  LCD_WR_DATA(0xA9);
-  LCD_WR_DATA(0x51);
-  LCD_WR_DATA(0x2C);
-  LCD_WR_DATA(0x82);
-  LCD_WR_REG(0xC0);
-  LCD_WR_DATA(0x11);
-  LCD_WR_DATA(0x09);
-  LCD_WR_REG(0xC1);
-  LCD_WR_DATA(0x41);
-  LCD_WR_REG(0XC5);
-  LCD_WR_DATA(0x00);
-  LCD_WR_DATA(0x0A);
-  LCD_WR_DATA(0x80);
-  LCD_WR_REG(0xB1);
-  LCD_WR_DATA(0xB0);
-  LCD_WR_DATA(0x11);
-  LCD_WR_REG(0xB4);
-  LCD_WR_DATA(0x02);
-  LCD_WR_REG(0xB6);
-  LCD_WR_DATA(0x02);
-  LCD_WR_DATA(0x42);
-  LCD_WR_REG(0xB7);
-  LCD_WR_DATA(0xc6);
-  LCD_WR_REG(0xBE);
-  LCD_WR_DATA(0x00);
-  LCD_WR_DATA(0x04);
-  LCD_WR_REG(0xE9);
-  LCD_WR_DATA(0x00);
-  LCD_WR_REG(0x36);
-  LCD_WR_DATA((1 << 3) | (0 << 7) | (1 << 6) | (1 << 5));
-  LCD_WR_REG(0x3A);
-  LCD_WR_DATA(0x66);
-  LCD_WR_REG(0xE0);
-  LCD_WR_DATA(0x00);
-  LCD_WR_DATA(0x07);
-  LCD_WR_DATA(0x10);
-  LCD_WR_DATA(0x09);
-  LCD_WR_DATA(0x17);
-  LCD_WR_DATA(0x0B);
-  LCD_WR_DATA(0x41);
-  LCD_WR_DATA(0x89);
-  LCD_WR_DATA(0x4B);
-  LCD_WR_DATA(0x0A);
-  LCD_WR_DATA(0x0C);
-  LCD_WR_DATA(0x0E);
-  LCD_WR_DATA(0x18);
-  LCD_WR_DATA(0x1B);
-  LCD_WR_DATA(0x0F);
-  LCD_WR_REG(0XE1);
-  LCD_WR_DATA(0x00);
-  LCD_WR_DATA(0x17);
-  LCD_WR_DATA(0x1A);
-  LCD_WR_DATA(0x04);
-  LCD_WR_DATA(0x0E);
-  LCD_WR_DATA(0x06);
-  LCD_WR_DATA(0x2F);
-  LCD_WR_DATA(0x45);
-  LCD_WR_DATA(0x43);
-  LCD_WR_DATA(0x02);
-  LCD_WR_DATA(0x0A);
-  LCD_WR_DATA(0x09);
-  LCD_WR_DATA(0x32);
-  LCD_WR_DATA(0x36);
-  LCD_WR_DATA(0x0F);
-  LCD_WR_REG(0x11);
-  delay_cycles(8640000);
-  LCD_WR_REG(0x29);
+    // SPI1_Init(); // 硬件SPI初始化
+    //	SPI_SetSpeed(SPI1,SPI_BaudRatePrescaler_2);
+    // LCD_GPIOInit(); // LCD GPIO初始化
+    LCD_RESET(); // LCD 复位
+    //************* ILI9488初始化**********//
+    LCD_WR_REG(0XF7);
+    LCD_WR_DATA(0xA9);
+    LCD_WR_DATA(0x51);
+    LCD_WR_DATA(0x2C);
+    LCD_WR_DATA(0x82);
+    LCD_WR_REG(0xC0);
+    LCD_WR_DATA(0x11);
+    LCD_WR_DATA(0x09);
+    LCD_WR_REG(0xC1);
+    LCD_WR_DATA(0x41);
+    LCD_WR_REG(0XC5);
+    LCD_WR_DATA(0x00);
+    LCD_WR_DATA(0x0A);
+    LCD_WR_DATA(0x80);
+    LCD_WR_REG(0xB1);
+    LCD_WR_DATA(0xB0);
+    LCD_WR_DATA(0x11);
+    LCD_WR_REG(0xB4);
+    LCD_WR_DATA(0x02);
+    LCD_WR_REG(0xB6);
+    LCD_WR_DATA(0x02);
+    LCD_WR_DATA(0x42);
+    LCD_WR_REG(0xB7);
+    LCD_WR_DATA(0xc6);
+    LCD_WR_REG(0xBE);
+    LCD_WR_DATA(0x00);
+    LCD_WR_DATA(0x04);
+    LCD_WR_REG(0xE9);
+    LCD_WR_DATA(0x00);
+    LCD_WR_REG(0x36);
+    LCD_WR_DATA((1 << 3) | (0 << 7) | (1 << 6) | (1 << 5));
+    LCD_WR_REG(0x3A);
+    LCD_WR_DATA(0x66);
+    LCD_WR_REG(0xE0);
+    LCD_WR_DATA(0x00);
+    LCD_WR_DATA(0x07);
+    LCD_WR_DATA(0x10);
+    LCD_WR_DATA(0x09);
+    LCD_WR_DATA(0x17);
+    LCD_WR_DATA(0x0B);
+    LCD_WR_DATA(0x41);
+    LCD_WR_DATA(0x89);
+    LCD_WR_DATA(0x4B);
+    LCD_WR_DATA(0x0A);
+    LCD_WR_DATA(0x0C);
+    LCD_WR_DATA(0x0E);
+    LCD_WR_DATA(0x18);
+    LCD_WR_DATA(0x1B);
+    LCD_WR_DATA(0x0F);
+    LCD_WR_REG(0XE1);
+    LCD_WR_DATA(0x00);
+    LCD_WR_DATA(0x17);
+    LCD_WR_DATA(0x1A);
+    LCD_WR_DATA(0x04);
+    LCD_WR_DATA(0x0E);
+    LCD_WR_DATA(0x06);
+    LCD_WR_DATA(0x2F);
+    LCD_WR_DATA(0x45);
+    LCD_WR_DATA(0x43);
+    LCD_WR_DATA(0x02);
+    LCD_WR_DATA(0x0A);
+    LCD_WR_DATA(0x09);
+    LCD_WR_DATA(0x32);
+    LCD_WR_DATA(0x36);
+    LCD_WR_DATA(0x0F);
+    LCD_WR_REG(0x11);
+    delay_cycles(8640000);
+    LCD_WR_REG(0x29);
 
-  LCD_direction(USE_HORIZONTAL); // 设置LCD显示方向
-  // LCD_LED = 1;                   // 点亮背光
-  LCD_Clear(WHITE); // 清全屏白色
+    LCD_direction(USE_HORIZONTAL); // 设置LCD显示方向
+    // LCD_LED = 1;                   // 点亮背光
+    LCD_Clear(WHITE); // 清全屏白色
 }
 
 /*****************************************************************************
@@ -235,19 +239,19 @@ window
  * @retvalue   :None
 ******************************************************************************/
 void LCD_SetWindows(u16 xStar, u16 yStar, u16 xEnd, u16 yEnd) {
-  LCD_WR_REG(lcddev.setxcmd);
-  LCD_WR_DATA(xStar >> 8);
-  LCD_WR_DATA(0x00FF & xStar);
-  LCD_WR_DATA(xEnd >> 8);
-  LCD_WR_DATA(0x00FF & xEnd);
+    LCD_WR_REG(lcddev.setxcmd);
+    LCD_WR_DATA(xStar >> 8);
+    LCD_WR_DATA(0x00FF & xStar);
+    LCD_WR_DATA(xEnd >> 8);
+    LCD_WR_DATA(0x00FF & xEnd);
 
-  LCD_WR_REG(lcddev.setycmd);
-  LCD_WR_DATA(yStar >> 8);
-  LCD_WR_DATA(0x00FF & yStar);
-  LCD_WR_DATA(yEnd >> 8);
-  LCD_WR_DATA(0x00FF & yEnd);
+    LCD_WR_REG(lcddev.setycmd);
+    LCD_WR_DATA(yStar >> 8);
+    LCD_WR_DATA(0x00FF & yStar);
+    LCD_WR_DATA(yEnd >> 8);
+    LCD_WR_DATA(0x00FF & yEnd);
 
-  LCD_WriteRAM_Prepare(); // 开始写入GRAM
+    LCD_WriteRAM_Prepare(); // 开始写入GRAM
 }
 
 /*****************************************************************************
@@ -260,7 +264,7 @@ coordinate of the pixel
  * @retvalue   :None
 ******************************************************************************/
 void LCD_SetCursor(u16 Xpos, u16 Ypos) {
-  LCD_SetWindows(Xpos, Ypos, Xpos, Ypos);
+    LCD_SetWindows(Xpos, Ypos, Xpos, Ypos);
 }
 
 /*****************************************************************************
@@ -274,37 +278,36 @@ void LCD_SetCursor(u16 Xpos, u16 Ypos) {
  * @retvalue   :None
 ******************************************************************************/
 void LCD_direction(u8 direction) {
-  lcddev.setxcmd = 0x2A;
-  lcddev.setycmd = 0x2B;
-  lcddev.wramcmd = 0x2C;
-  switch (direction) {
-  case 0:
-    lcddev.width = LCD_W;
-    lcddev.height = LCD_H;
-    LCD_WriteReg(0x36,
-                 (1 << 3) | (0 << 6) | (0 << 7)); // BGR==1,MY==0,MX==0,MV==0
-    break;
-  case 1:
-    lcddev.width = LCD_H;
-    lcddev.height = LCD_W;
-    LCD_WriteReg(0x36, (1 << 3) | (0 << 7) | (1 << 6) |
-                           (1 << 5)); // BGR==1,MY==1,MX==0,MV==1
-    break;
-  case 2:
-    lcddev.width = LCD_W;
-    lcddev.height = LCD_H;
-    LCD_WriteReg(0x36,
-                 (1 << 3) | (1 << 6) | (1 << 7)); // BGR==1,MY==0,MX==0,MV==0
-    break;
-  case 3:
-    lcddev.width = LCD_H;
-    lcddev.height = LCD_W;
-    LCD_WriteReg(0x36,
-                 (1 << 3) | (1 << 7) | (1 << 5)); // BGR==1,MY==1,MX==0,MV==1
-    break;
-  default:
-    break;
-  }
+    lcddev.setxcmd = 0x2A;
+    lcddev.setycmd = 0x2B;
+    lcddev.wramcmd = 0x2C;
+    switch (direction) {
+    case 0:
+        lcddev.width = LCD_W;
+        lcddev.height = LCD_H;
+        LCD_WriteReg(0x36,
+                     (1 << 3) | (0 << 6) | (0 << 7)); // BGR==1,MY==0,MX==0,MV==0
+        break;
+    case 1:
+        lcddev.width = LCD_H;
+        lcddev.height = LCD_W;
+        LCD_WriteReg(0x36, (1 << 3) | (0 << 7) | (1 << 6) | (1 << 5)); // BGR==1,MY==1,MX==0,MV==1
+        break;
+    case 2:
+        lcddev.width = LCD_W;
+        lcddev.height = LCD_H;
+        LCD_WriteReg(0x36,
+                     (1 << 3) | (1 << 6) | (1 << 7)); // BGR==1,MY==0,MX==0,MV==0
+        break;
+    case 3:
+        lcddev.width = LCD_H;
+        lcddev.height = LCD_W;
+        LCD_WriteReg(0x36,
+                     (1 << 3) | (1 << 7) | (1 << 5)); // BGR==1,MY==1,MX==0,MV==1
+        break;
+    default:
+        break;
+    }
 }
 // 常用ASCII表
 // 偏移量32
@@ -504,22 +507,54 @@ static const unsigned char asc2_1608[95][16] = {
      0x00, 0x00, 0x00, 0x00}, /*"~",94*/
 };
 static void LCD_Show_Char(u16 x, u16 y, char c) {
-  c -= 32;
-  LCD_SetWindows(x, y, x + 8 - 1, y + 16 - 1);
-  for (uint16_t line = 0; line < 16; ++line) {
-    for (uint16_t p = 0; p < 8; ++p) {
-      if ((1 << p) & asc2_1608[c][line]) {
-        Lcd_WriteData_16Bit(POINT_COLOR);
-      } else {
-        Lcd_WriteData_16Bit(BACK_COLOR);
-      }
+    c -= 32;
+    if (c < 0 || c >= 95) c = ' ' - 32;
+    LCD_SetWindows(x, y, x + 8 - 1, y + 16 - 1);
+    for (uint16_t line = 0; line < 16; ++line) {
+        for (uint16_t p = 0; p < 8; ++p) {
+            if ((1 << p) & asc2_1608[c][line]) {
+                Lcd_WriteData_16Bit(POINT_COLOR);
+            } else {
+                Lcd_WriteData_16Bit(BACK_COLOR);
+            }
+        }
     }
-  }
 }
 void LCD_Show_String(u16 x, u16 y, char *str) {
-  while (*str) {
-    LCD_Show_Char(x, y, *str);
-    x += 8;
-    ++str;
-  }
+    while (*str) {
+        LCD_Show_Char(x, y, *str);
+        x += 8;
+        ++str;
+    }
+}
+void lcd_log(char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    vsprintf(sudoer_str_tmp, format, args);
+    va_end(args);
+    sudoer_LCD_console_print();
+}
+static void sudoer_LCD_Show_String_at_Line(int line) {
+    for (int i = strlen(sudoer_str_tmp); i < 320 / 8; ++i) {
+        sudoer_str_tmp[i] = ' ';
+    }
+    sudoer_str_tmp[40] = 0;
+    LCD_Show_String(0, 16 * line, sudoer_str_tmp);
+}
+void sudoer_LCD_console_print() {
+    const uint16_t color0 = 0x0000;
+    const uint16_t color1 = 0xf800;
+    static int color = 0;
+    uint16_t color_tmp = POINT_COLOR;
+    POINT_COLOR = (color == 0) ? color0 : color1;
+    static int cur_line = 0;
+    sudoer_LCD_Show_String_at_Line(cur_line);
+
+    ++cur_line;
+    if (cur_line > (480 / 16)) {
+        cur_line = 0;
+        color = 1 - color;
+    }
+    POINT_COLOR = color_tmp;
 }
