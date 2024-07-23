@@ -37,83 +37,82 @@
 #include "ti_msp_dl_config.h"
 #include <stdio.h>
 int fputc(int _c, FILE *f) {
-  while (DL_UART_Main_isBusy(UART_0_INST))
-    ;
-  DL_UART_Main_transmitData(UART_0_INST, _c);
+    while (DL_UART_Main_isBusy(UART_0_INST))
+        ;
+    DL_UART_Main_transmitData(UART_0_INST, _c);
 }
 int putc(int _x, FILE *_fp) {
-  fputc(_x, _fp);
-  return 0;
+    fputc(_x, _fp);
+    return 0;
 }
 int putchar(int data) {
-  fputc(data, NULL);
-  return 0;
+    fputc(data, NULL);
+    return 0;
 }
 int fputs(const char *_p, FILE *f) {
-  while (*_p != 0) {
-    fputc(*_p, f);
-    ++_p;
-  }
-  return 0;
+    while (*_p != 0) {
+        fputc(*_p, f);
+        ++_p;
+    }
+    return 0;
 }
 
 int range_protect(int x, int low, int high) {
-  return x < low ? low : (x > high ? high : x);
+    return x < low ? low : (x > high ? high : x);
 }
 
 int main(void) {
-  SYSCFG_DL_init();
-  NVIC_ClearPendingIRQ(TIMER_0_INST_INT_IRQN);
-  NVIC_ClearPendingIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
-  NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
-  NVIC_EnableIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
-  printf(__TIME__);
-  LCD_Init();
-  LCD_Clear(0xf800);
-  for (int x = 0; x < 100; ++x) {
-    for (int y = 0; y < 200; ++y) {
-      LCD_DrawPoint(x, y);
+    SYSCFG_DL_init();
+    NVIC_ClearPendingIRQ(TIMER_0_INST_INT_IRQN);
+    NVIC_ClearPendingIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
+    NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
+    NVIC_EnableIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
+    printf(__TIME__);
+    LCD_Init();
+    LCD_Clear(0xf800);
+    for (int x = 0; x < 100; ++x) {
+        for (int y = 0; y < 200; ++y) {
+            LCD_DrawPoint(x, y);
+        }
     }
-  }
-  for (int i = 0; i < 10000; ++i) {
-    LCD_Clear(0x0000);
-    LCD_Clear(0xffff);
-  }
-  DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
-                                   DL_TIMER_CC_0_INDEX); // right
-  DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
-                                   DL_TIMER_CC_1_INDEX); // left
+    for (int i = 0; i < 10000; ++i) {
+        LCD_Clear(0x0000);
+        LCD_Clear(0xffff);
+    }
+    DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
+                                     DL_TIMER_CC_0_INDEX); // right
+    DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
+                                     DL_TIMER_CC_1_INDEX); // left
 
-  DL_TimerG_startCounter(PWM_MOTOR_INST);
-  while (1) {
+    DL_TimerG_startCounter(PWM_MOTOR_INST);
+    while (1) {
+        // DL_UART_Main_transmitData(UART_0_INST, 'c');
+        delay_cycles(18000000);
+        // printf("encoder %d %d\n", encoderB_get(), encoderA_get()); // left right
+        int speed_l = getspeed_left();
+        int speed_r = getspeed_right();
+        printf("speed %d %d\n", speed_l, speed_r);
 
-    // DL_UART_Main_transmitData(UART_0_INST, 'c');
-    delay_cycles(18000000);
-    // printf("encoder %d %d\n", encoderB_get(), encoderA_get()); // left right
-    int speed_l = getspeed_left();
-    int speed_r = getspeed_right();
-    printf("speed %d %d\n", speed_l, speed_r);
-
-    int res_l = Velocity_A(15, speed_l);
-    int res_r = Velocity_B(15, speed_r);
-    res_l = range_protect(res_l, 0, 300);
-    res_r = range_protect(res_r, 0, 300);
-    printf("pwm %d %d\n", res_l, res_r);
-    DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, res_r,
-                                     DL_TIMER_CC_0_INDEX);
-    DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, res_l,
-                                     DL_TIMER_CC_1_INDEX);
-  }
+        int res_l = Velocity_A(15, speed_l);
+        int res_r = Velocity_B(15, speed_r);
+        res_l = range_protect(res_l, 0, 300);
+        res_r = range_protect(res_r, 0, 300);
+        printf("pwm %d %d\n", res_l, res_r);
+        DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, res_r,
+                                         DL_TIMER_CC_0_INDEX);
+        DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, res_l,
+                                         DL_TIMER_CC_1_INDEX);
+    }
 }
 
 // 10ms
 void TIMER_0_INST_IRQHandler(void) {
-  // DL_GPIO_togglePins(GPIO_B_PORT, GPIO_B_LED2_GREEN_PIN);
-  static int count = 0;
-  ++count;
-  if (count == 99) {
-    DL_GPIO_togglePins(GPIO_A_PORT, GPIO_A_LED1_PIN);
-    count = 0;
-  }
-  update_speed_irq();
+    // DL_GPIO_togglePins(GPIO_B_PORT, GPIO_B_LED2_GREEN_PIN);
+    static int count = 0;
+    ++count;
+    if (count == 99) {
+        DL_GPIO_togglePins(GPIO_A_PORT, GPIO_A_LED1_PIN);
+        count = 0;
+    }
+    update_speed_irq();
 }
