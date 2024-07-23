@@ -66,7 +66,7 @@ int main(void) {
     NVIC_ClearPendingIRQ(TIMER_0_INST_INT_IRQN);
     NVIC_ClearPendingIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
     NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
-    NVIC_EnableIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
+    //NVIC_EnableIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
     printf(__TIME__);
     LCD_Init();
     LCD_Clear(0xf800);
@@ -75,10 +75,8 @@ int main(void) {
             LCD_DrawPoint(x, y);
         }
     }
-    for (int i = 0; i < 10000; ++i) {
-        LCD_Clear(0x0000);
-        LCD_Clear(0xffff);
-    }
+    LCD_Show_String(0, 0, __TIME__);
+    
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
                                      DL_TIMER_CC_0_INDEX); // right
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
@@ -114,5 +112,5 @@ void TIMER_0_INST_IRQHandler(void) {
         DL_GPIO_togglePins(GPIO_A_PORT, GPIO_A_LED1_PIN);
         count = 0;
     }
-    update_speed_irq();
+    //update_speed_irq();
 }

@@ -519,6 +519,7 @@ static void LCD_Show_Char(u16 x, u16 y, char c) {
 void LCD_Show_String(u16 x, u16 y, char *str) {
   while (*str) {
     LCD_Show_Char(x, y, *str);
-    x += 16;
+    x += 8;
+    ++str;
   }
 }
