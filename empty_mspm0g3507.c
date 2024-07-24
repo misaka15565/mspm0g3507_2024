@@ -30,14 +30,13 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "driver/delay.h"
 #include "driver/encoder.h"
 #include "driver/lcd.h"
 #include "driver/motor.h"
 #include "ti_msp_dl_config.h"
 #include <stdio.h>
 #include "driver/servo.h"
-
+#include "driver/mpu6050.h"
 int range_protect(int x, int low, int high) {
     return x < low ? low : (x > high ? high : x);
 }
@@ -46,17 +45,23 @@ int main(void) {
     SYSCFG_DL_init();
     NVIC_ClearPendingIRQ(TIMER_0_INST_INT_IRQN);
     NVIC_ClearPendingIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
+
     NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
-    // NVIC_EnableIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
+    NVIC_EnableIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
+
     LCD_Init();
     lcd_log(__TIME__);
     lcd_log("aaa%d\n", 3);
+    MPU6050_Init();
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
                                      DL_TIMER_CC_0_INDEX); // right
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
                                      DL_TIMER_CC_1_INDEX); // left
 
     DL_TimerG_startCounter(PWM_MOTOR_INST);
+    MPU6050_Init();
+
+    printf("Initialization Data Succeed \r\n");
     int angle = 0;
     while (1) {
         // DL_UART_Main_transmitData(UART_0_INST, 'c');
@@ -64,12 +69,16 @@ int main(void) {
         angle = (angle + 1) % 360;
         setAngle(angle < 180 ? angle : 360 - angle);
         lcd_log("angle %d\n", angle);
+        int16_t a, b, c, d, e, f;
+        //MPU6050_GetData(&a, &b, &c, &d, &e, &f);
+        lcd_log("%d %d %d\n", a, b, c);
+        lcd_log("%d %d %d\n", d, e, f);
         continue;
         // printf("encoder %d %d\n", encoderB_get(), encoderA_get()); // left right
         int speed_l = getspeed_left();
         int speed_r = getspeed_right();
         lcd_log("speed %d %d\n", speed_l, speed_r);
-        
+
         int res_l = Velocity_A(15, speed_l);
         int res_r = Velocity_B(15, speed_r);
         res_l = range_protect(res_l, 0, 300);
@@ -87,7 +96,7 @@ void TIMER_0_INST_IRQHandler(void) {
     // DL_GPIO_togglePins(GPIO_B_PORT, GPIO_B_LED2_GREEN_PIN);
     static int count = 0;
     ++count;
-    if (count == 99) {
+    if (count == 49) {
         DL_GPIO_togglePins(GPIO_A_PORT, GPIO_A_LED1_PIN);
         count = 0;
     }
