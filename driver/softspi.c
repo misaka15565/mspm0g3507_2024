@@ -1,6 +1,4 @@
 #include "softspi.h"
-#include "ti/driverlib/dl_gpio.h"
-#include "ti/driverlib/dl_spi.h"
 #include "ti_msp_dl_config.h"
 
 void softspi_writedata(uint8_t data) {

@@ -37,28 +37,7 @@
 #include "ti_msp_dl_config.h"
 #include <stdio.h>
 #include "driver/servo.h"
-/*
-int fputc(int _c, FILE *f) {
-    while (DL_UART_Main_isBusy(UART_0_INST))
-        ;
-    DL_UART_Main_transmitData(UART_0_INST, _c);
-}
-int putc(int _x, FILE *_fp) {
-    fputc(_x, _fp);
-    return 0;
-}
-int putchar(int data) {
-    fputc(data, NULL);
-    return 0;
-}
-int fputs(const char *_p, FILE *f) {
-    while (*_p != 0) {
-        fputc(*_p, f);
-        ++_p;
-    }
-    return 0;
-}
-*/
+
 int range_protect(int x, int low, int high) {
     return x < low ? low : (x > high ? high : x);
 }
@@ -90,7 +69,7 @@ int main(void) {
         int speed_l = getspeed_left();
         int speed_r = getspeed_right();
         lcd_log("speed %d %d\n", speed_l, speed_r);
-
+        
         int res_l = Velocity_A(15, speed_l);
         int res_r = Velocity_B(15, speed_r);
         res_l = range_protect(res_l, 0, 300);
