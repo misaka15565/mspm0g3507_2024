@@ -5,6 +5,6 @@ int Velocity_A(int TargetVelocity, int CurrentVelocity);
 int Velocity_B(int TargetVelocity, int CurrentVelocity);
 void Set_PWM(int pwma,int pwmb);
 void update_speed_irq();
-int getspeed_left();
-int getspeed_right();
+int motorA_getspeed();
+int motorB_getspeed();
 #endif

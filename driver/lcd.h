@@ -87,7 +87,7 @@ void LCD_Show_String(u16 x, u16 y, char *str);
 
 extern char sudoer_str_tmp[256];
 
-void lcd_log(char* str,...);
+void lcd_log(char *str, ...);
 void sudoer_LCD_console_print();
-
+void lcd_show(int lint, char *format, ...);
 #endif

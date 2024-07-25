@@ -52,41 +52,41 @@ int main(void) {
     LCD_Init();
     lcd_log(__TIME__);
     lcd_log("aaa%d\n", 3);
-    MPU6050_Init();
+    // MPU6050_Init();
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
                                      DL_TIMER_CC_0_INDEX); // right
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
                                      DL_TIMER_CC_1_INDEX); // left
 
     DL_TimerG_startCounter(PWM_MOTOR_INST);
-    MPU6050_Init();
-
-    printf("Initialization Data Succeed \r\n");
+    // lcd_log("%d\n",MPU6050_GetID());
     int angle = 0;
     while (1) {
         // DL_UART_Main_transmitData(UART_0_INST, 'c');
-        delay_cycles(9000000);
+        //delay_cycles(4500000);
         angle = (angle + 1) % 360;
         setAngle(angle < 180 ? angle : 360 - angle);
         lcd_log("angle %d\n", angle);
-        int16_t a, b, c, d, e, f;
-        //MPU6050_GetData(&a, &b, &c, &d, &e, &f);
-        lcd_log("%d %d %d\n", a, b, c);
-        lcd_log("%d %d %d\n", d, e, f);
-        continue;
-        // printf("encoder %d %d\n", encoderB_get(), encoderA_get()); // left right
-        int speed_l = getspeed_left();
-        int speed_r = getspeed_right();
-        lcd_log("speed %d %d\n", speed_l, speed_r);
+        // int16_t a, b, c, d, e, f;
+        // MPU6050_GetData(&a, &b, &c, &d, &e, &f);
+        // lcd_log("%d %d %d\n", a, b, c);
+        // lcd_log("%d %d %d\n", d, e, f);
+        // continue;
+        //  printf("encoder %d %d\n", encoderB_get(), encoderA_get()); // left right
+        int speed_B = motorB_getspeed();
+        int speed_A = motorA_getspeed();
+        lcd_show(0, "speed %d %d\n", speed_A, speed_B);
 
-        int res_l = Velocity_A(15, speed_l);
-        int res_r = Velocity_B(15, speed_r);
-        res_l = range_protect(res_l, 0, 300);
-        res_r = range_protect(res_r, 0, 300);
-        lcd_log("pwm %d %d\n", res_l, res_r);
-        DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, res_r,
+        int res_A = Velocity_A(15, speed_A);
+        int res_B = Velocity_B(15, speed_B);
+        res_A = range_protect(res_A, 0, 300);
+        res_B = range_protect(res_B, 0, 300);
+        lcd_show(1, "pwm %d %d\n", res_A, res_B);
+        Set_PWM(res_A, res_B);
+        continue;
+        DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, res_B,
                                          DL_TIMER_CC_0_INDEX);
-        DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, res_l,
+        DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, res_A,
                                          DL_TIMER_CC_1_INDEX);
     }
 }
@@ -97,8 +97,8 @@ void TIMER_0_INST_IRQHandler(void) {
     static int count = 0;
     ++count;
     if (count == 49) {
-        DL_GPIO_togglePins(GPIO_A_PORT, GPIO_A_LED1_PIN);
+        // DL_GPIO_togglePins(GPIO_A_PORT, GPIO_A_LED1_PIN);
         count = 0;
     }
-    // update_speed_irq();
+    update_speed_irq();
 }

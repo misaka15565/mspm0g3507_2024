@@ -44,7 +44,7 @@ static void softi2c_sda_in() {
                                      DL_GPIO_WAKEUP_DISABLE);
 }
 void delay_us(int us) {
-    delay_cycles(us * CPUCLK_FREQ / 1000000);
+    while (us--) delay_cycles(CPUCLK_FREQ / 1000000);
 }
 static softi2c_write_scl(uint8_t bit) {
     if (bit) {
@@ -72,7 +72,7 @@ static uint8_t softi2c_read_sda(void) {
         b = 1;
     else
         b = 0;
-    delay_cycles(8);
+    delay_us(8);
     return b;
 }
 static void softi2c_Start(void) {
@@ -136,6 +136,8 @@ char MPU6050_WriteReg(uint8_t regaddr, uint8_t data) {
     softi2c_Start();
     softi2c_SendByte(MPU6050_ADDRESS);
     softi2c_ReceiveAck();
+    softi2c_SendByte(regaddr << 1);
+    softi2c_ReceiveAck();
     softi2c_SendByte(data);
     softi2c_ReceiveAck();
     softi2c_Stop();
@@ -183,7 +185,9 @@ uint8_t MPU6050_ReadReg(uint8_t regaddr) {
 
 void MPU6050_Init(void) {
     // softi2c_init();									//先初始化底层的I2C
-
+    MPU6050_WriteReg(MPU6050_PWR_MGMT_1, 0x80);
+    delay_us(100 * 1000);
+    MPU6050_WriteReg(MPU6050_PWR_MGMT_1, 0x00);
     /*MPU6050寄存器初始化，需要对照MPU6050手册的寄存器描述配置，此处仅配置了部分重要的寄存器*/
     MPU6050_WriteReg(MPU6050_PWR_MGMT_1, 0x01);   // 电源管理寄存器1，取消睡眠模式，选择时钟源为X轴陀螺仪
     MPU6050_WriteReg(MPU6050_PWR_MGMT_2, 0x00);   // 电源管理寄存器2，保持默认值0，所有轴均不待机
@@ -199,7 +203,7 @@ void MPU6050_Init(void) {
  * 返 回 值：MPU6050的ID号
  */
 uint8_t MPU6050_GetID(void) {
-    return MPU6050_ReadReg(MPU6050_WHO_AM_I); // 返回WHO_AM_I寄存器的值
+    return MPU6050_ReadReg(MPU6050_WHO_AM_I << 1); // 返回WHO_AM_I寄存器的值
 }
 
 /**

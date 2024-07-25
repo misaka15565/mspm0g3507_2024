@@ -530,7 +530,7 @@ void LCD_Show_String(u16 x, u16 y, char *str) {
 void lcd_log(char *format, ...) {
     va_list args;
     va_start(args, format);
-    vprintf(format, args);
+    //vprintf(format, args);
     vsprintf(sudoer_str_tmp, format, args);
     va_end(args);
     sudoer_LCD_console_print();
@@ -552,9 +552,16 @@ void sudoer_LCD_console_print() {
     sudoer_LCD_Show_String_at_Line(cur_line);
 
     ++cur_line;
-    if (cur_line > (480 / 16)) {
+    if (cur_line > (20)) {
         cur_line = 0;
         color = 1 - color;
     }
     POINT_COLOR = color_tmp;
+}
+void lcd_show(int line, char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    vsprintf(sudoer_str_tmp, format, args);
+    va_end(args);
+    sudoer_LCD_Show_String_at_Line(line % 10 + 20);
 }
