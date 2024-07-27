@@ -7,13 +7,20 @@
  * 不靠卖板赚钱，以培养中国工程师为己任
  * Change Logs:
  * Date           Author       Notes
- * 2024-05-28     LCKFB-LP    first version
+ * 2024-05-23     LCKFB     first version
  */
-#ifndef MPU6050_H
-#define MPU6050_H
-#include <stdint.h>
-void MPU6050_Init(void);
-uint8_t MPU6050_GetID(void);
-void MPU6050_GetData(int16_t *AccX, int16_t *AccY, int16_t *AccZ,
-                     int16_t *GyroX, int16_t *GyroY, int16_t *GyroZ);
+#ifndef	__BOARD_H__
+#define __BOARD_H__
+
+#include "ti_msp_dl_config.h"
+
+
+void board_init(void);
+
+void delay_us(unsigned long us);
+void delay_ms(unsigned long ms);
+void delay_1us(unsigned long __us);
+void delay_1ms(unsigned long ms);
+
+
 #endif

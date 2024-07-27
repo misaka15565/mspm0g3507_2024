@@ -36,23 +36,30 @@
 #include "ti_msp_dl_config.h"
 #include <stdio.h>
 #include "driver/servo.h"
-#include "driver/mpu6050.h"
+#include "driver/mpu6050/bsp_mpu6050.h"
+#include "driver/mpu6050/inv_mpu_dmp_motion_driver.h"
+#include "driver/mpu6050/inv_mpu.h"
 int range_protect(int x, int low, int high) {
     return x < low ? low : (x > high ? high : x);
 }
 
 int main(void) {
     SYSCFG_DL_init();
+    board_init();
+    MPU6050_Init();
+    while (mpu_dmp_init()) {
+        printf("dmp error\r\n");
+        delay_ms(200);
+    }
+    printf("Initialization Data Succeed \r\n");
     NVIC_ClearPendingIRQ(TIMER_0_INST_INT_IRQN);
     NVIC_ClearPendingIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
 
     NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
     NVIC_EnableIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
-
     LCD_Init();
     lcd_log(__TIME__);
     lcd_log("aaa%d\n", 3);
-    // MPU6050_Init();
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
                                      DL_TIMER_CC_0_INDEX); // right
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
@@ -63,16 +70,15 @@ int main(void) {
     int angle = 0;
     while (1) {
         // DL_UART_Main_transmitData(UART_0_INST, 'c');
-        //delay_cycles(4500000);
+        // delay_cycles(4500000);
         angle = (angle + 1) % 360;
         setAngle(angle < 180 ? angle : 360 - angle);
         lcd_log("angle %d\n", angle);
-        // int16_t a, b, c, d, e, f;
-        // MPU6050_GetData(&a, &b, &c, &d, &e, &f);
-        // lcd_log("%d %d %d\n", a, b, c);
-        // lcd_log("%d %d %d\n", d, e, f);
-        // continue;
-        //  printf("encoder %d %d\n", encoderB_get(), encoderA_get()); // left right
+        float p, r, y;
+        uint8_t status = mpu_dmp_get_data(&p, &r, &y);
+        if (status) {
+            lcd_show(2, "pitch %.2f roll %.2f yaw %.2f", p, r, y);
+        }
         int speed_B = motorB_getspeed();
         int speed_A = motorA_getspeed();
         lcd_show(0, "speed %d %d\n", speed_A, speed_B);

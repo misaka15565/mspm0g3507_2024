@@ -3,6 +3,7 @@
 #include "ti_msp_dl_config.h"
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 #define LCD_CS_SET
 
 #define LCD_RS_SET DL_GPIO_setPins(TFT_DC_RS_PORT, TFT_DC_RS_PIN)
@@ -530,7 +531,7 @@ void LCD_Show_String(u16 x, u16 y, char *str) {
 void lcd_log(char *format, ...) {
     va_list args;
     va_start(args, format);
-    //vprintf(format, args);
+    // vprintf(format, args);
     vsprintf(sudoer_str_tmp, format, args);
     va_end(args);
     sudoer_LCD_console_print();
@@ -552,7 +553,7 @@ void sudoer_LCD_console_print() {
     sudoer_LCD_Show_String_at_Line(cur_line);
 
     ++cur_line;
-    if (cur_line > (20)) {
+    if (cur_line >= (20)) {
         cur_line = 0;
         color = 1 - color;
     }
@@ -563,5 +564,5 @@ void lcd_show(int line, char *format, ...) {
     va_start(args, format);
     vsprintf(sudoer_str_tmp, format, args);
     va_end(args);
-    sudoer_LCD_Show_String_at_Line(line % 10 + 20);
+    sudoer_LCD_Show_String_at_Line((line % 10) + 20);
 }
