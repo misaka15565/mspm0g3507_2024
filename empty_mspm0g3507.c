@@ -39,7 +39,6 @@
 #include "driver/mpu6050/bsp_mpu6050.h"
 #include "driver/mpu6050/inv_mpu_dmp_motion_driver.h"
 #include "driver/mpu6050/inv_mpu.h"
-#include "driver/uart_receive.h"
 int range_protect(int x, int low, int high) {
     return x < low ? low : (x > high ? high : x);
 }
@@ -56,10 +55,8 @@ int main(void) {
     printf("Initialization Data Succeed \r\n");
     NVIC_ClearPendingIRQ(TIMER_0_INST_INT_IRQN);
     NVIC_ClearPendingIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
-    NVIC_ClearPendingIRQ(UART_OPENMV_INST_INT_IRQN);
     NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
     NVIC_EnableIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
-    NVIC_EnableIRQ(UART_OPENMV_INST_INT_IRQN);
     LCD_Init();
     lcd_log(__TIME__);
     lcd_log("aaa%d\n", 3);
@@ -85,7 +82,6 @@ int main(void) {
         int speed_B = motorB_getspeed();
         int speed_A = motorA_getspeed();
         lcd_show(0, "speed %d %d\n", speed_A, speed_B);
-        lcd_show(4, uart_openmv_buffer);
         int res_A = Velocity_A(15, speed_A);
         int res_B = Velocity_B(15, speed_B);
         res_A = range_protect(res_A, 0, 300);
