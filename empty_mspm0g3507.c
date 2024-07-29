@@ -39,6 +39,7 @@
 #include "driver/mpu6050/bsp_mpu6050.h"
 #include "driver/mpu6050/inv_mpu_dmp_motion_driver.h"
 #include "driver/mpu6050/inv_mpu.h"
+#include "driver/oled.h"
 int range_protect(int x, int low, int high) {
     return x < low ? low : (x > high ? high : x);
 }
@@ -46,7 +47,7 @@ int range_protect(int x, int low, int high) {
 int main(void) {
     SYSCFG_DL_init();
     board_init();
-    //MPU6050_Init();
+    // MPU6050_Init();
     /*
     while (mpu_dmp_init()) {
         printf("dmp error\r\n");
@@ -57,9 +58,12 @@ int main(void) {
     NVIC_ClearPendingIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
     NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
     NVIC_EnableIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
-    LCD_Init();
-    lcd_log(__TIME__);
-    lcd_log("aaa%d\n", 3);
+    OLED_Init();
+
+    OLED_Clear();
+    //  OLED_ShowNum(2, 1, 200, 4, OLED_SIZE, OLED_MODE);
+    OLED_ShowString(10, 5, (uint8_t *)"hello", 8, 1);
+    OLED_Refresh();
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
                                      DL_TIMER_CC_0_INDEX); // right
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
@@ -73,20 +77,20 @@ int main(void) {
         // delay_cycles(4500000);
         angle = (angle + 1) % 360;
         setAngle(angle < 180 ? angle : 360 - angle);
-        lcd_log("angle %d\n", angle);
+        // lcd_log("angle %d\n", angle);
         float p, r, y;
-        //uint8_t status = mpu_dmp_get_data(&p, &r, &y);
-        //if (status) {
-        //    lcd_show(2, "pitch %.2f roll %.2f yaw %.2f", p, r, y);
-        //}
+        // uint8_t status = mpu_dmp_get_data(&p, &r, &y);
+        // if (status) {
+        //     lcd_show(2, "pitch %.2f roll %.2f yaw %.2f", p, r, y);
+        // }
         int speed_B = motorB_getspeed();
         int speed_A = motorA_getspeed();
-        lcd_show(0, "speed %d %d\n", speed_A, speed_B);
+        // lcd_show(0, "speed %d %d\n", speed_A, speed_B);
         int res_A = Velocity_A(15, speed_A);
         int res_B = Velocity_B(15, speed_B);
         res_A = range_protect(res_A, 0, 300);
         res_B = range_protect(res_B, 0, 300);
-        lcd_show(1, "pwm %d %d\n", res_A, res_B);
+        // lcd_show(1, "pwm %d %d\n", res_A, res_B);
         Set_PWM(res_A, res_B);
         continue;
         DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, res_B,
