@@ -310,14 +310,10 @@ void OLED_ShowChar(uint8_t x, uint8_t y, uint8_t chr, uint8_t size1, uint8_t mod
     }
 }
 
-void OLED_ShowString(uint8_t x, uint8_t y, uint8_t *chr, uint8_t size1, uint8_t mode) {
-    while ((*chr >= ' ') && (*chr <= '~')) // 闁跨喎褰ㄧ拋瑙勫闁跨喕顫楃拠褎瀚归柨鐔活潡闂堢偛鍤栭幏鐑芥晸鐞涙鍤栭幏锟�!
-    {
-        OLED_ShowChar(x, y, *chr, size1, mode);
-        if (size1 == 8)
-            x += 6;
-        else
-            x += size1 / 2;
+void OLED_ShowString(uint8_t x, uint8_t y, uint8_t *chr, uint8_t mode) {
+    while ((*chr >= ' ') && (*chr <= '~')) {
+        OLED_ShowChar(x, y, *chr, 8, mode);
+        x += 6;
         chr++;
     }
 }

@@ -46,12 +46,11 @@ int range_protect(int x, int low, int high) {
 int main(void) {
     SYSCFG_DL_init();
     board_init();
-    // MPU6050_Init();
-    /*
+    MPU6050_Init();
     while (mpu_dmp_init()) {
         printf("dmp error\r\n");
         delay_ms(200);
-    }*/
+    }
     printf("Initialization Data Succeed \r\n");
     NVIC_ClearPendingIRQ(TIMER_0_INST_INT_IRQN);
     NVIC_ClearPendingIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
@@ -61,7 +60,7 @@ int main(void) {
 
     OLED_Clear();
     //  OLED_ShowNum(2, 1, 200, 4, OLED_SIZE, OLED_MODE);
-    OLED_ShowString(10, 5, (uint8_t *)"hello", 8, 1);
+    OLED_ShowString(10, 5, (uint8_t *)"hello", 1);
     OLED_Refresh();
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
                                      DL_TIMER_CC_0_INDEX); // right
@@ -78,10 +77,10 @@ int main(void) {
         setAngle(angle < 180 ? angle : 360 - angle);
         // lcd_log("angle %d\n", angle);
         float p, r, y;
-        // uint8_t status = mpu_dmp_get_data(&p, &r, &y);
-        // if (status) {
-        //     lcd_show(2, "pitch %.2f roll %.2f yaw %.2f", p, r, y);
-        // }
+        uint8_t status = mpu_dmp_get_data(&p, &r, &y);
+        if (status) {
+            printf("pitch %.2f roll %.2f yaw %.2f\n", p, r, y);
+        }
         int speed_B = motorB_getspeed();
         int speed_A = motorA_getspeed();
         // lcd_show(0, "speed %d %d\n", speed_A, speed_B);
