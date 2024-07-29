@@ -94,7 +94,7 @@ int main(void) {
         }
 
         if (dmp_try_count > 100) {
-            //陀螺仪挂了，死啦
+            // 陀螺仪挂了，死啦
         }
 
         int speed_B = motorB_getspeed();
@@ -114,15 +114,14 @@ int main(void) {
     }
 }
 
-// 10ms
+// 1ms
 void TIMER_0_INST_IRQHandler(void) {
     // DL_GPIO_togglePins(GPIO_B_PORT, GPIO_B_LED2_GREEN_PIN);
     static int count = 0;
     ++count;
-    if (count == 49) {
-        // DL_GPIO_togglePins(GPIO_A_PORT, GPIO_A_LED1_PIN);
+    if (count == 10) {
+        update_speed_irq();
+        key_IRQHandler();
         count = 0;
     }
-    update_speed_irq();
-    key_IRQHandler();
 }

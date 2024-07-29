@@ -213,8 +213,8 @@ TIMER1.interrupts       = ["ZERO"];
 TIMER1.timerClkDiv      = 8;
 TIMER1.timerMode        = "PERIODIC_UP";
 TIMER1.timerStartTimer  = true;
-TIMER1.timerPeriod      = "10 ms";
 TIMER1.timerClkPrescale = 90;
+TIMER1.timerPeriod      = "1 ms";
 
 ProjectConfig.deviceSpin = "MSPM0G3507";
 
