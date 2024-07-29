@@ -34,7 +34,6 @@
 #include "driver/motor.h"
 #include "ti_msp_dl_config.h"
 #include <stdio.h>
-#include "driver/servo.h"
 #include "driver/mpu6050/bsp_mpu6050.h"
 #include "driver/mpu6050/inv_mpu_dmp_motion_driver.h"
 #include "driver/mpu6050/inv_mpu.h"
@@ -75,8 +74,6 @@ int main(void) {
     while (1) {
         uint32_t time_use = ((volatile SysTick_Type *)SysTick)->VAL;
         oled_print(4, "time=%d", time_use);
-        angle = (angle + 1) % 360;
-        setAngle(angle < 180 ? angle : 360 - angle);
         volatile float p, r, y;
         p = -999;
         r = -999;
@@ -99,10 +96,11 @@ int main(void) {
 
         int speed_B = motorB_getspeed();
         int speed_A = motorA_getspeed();
-        int res_A = Velocity_A(15, speed_A);
-        int res_B = Velocity_B(15, speed_B);
-        res_A = range_protect(res_A, 0, 300);
-        res_B = range_protect(res_B, 0, 300);
+        int res_A = Velocity_A(30, speed_A);
+        int res_B = Velocity_B(30, speed_B);
+        res_A = range_protect(res_A, 0, 600);
+        res_B = range_protect(res_B, 0, 600);
+
         Set_PWM(res_A, res_B);
 
         OLED_Refresh();

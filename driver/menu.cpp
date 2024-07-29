@@ -161,7 +161,14 @@ void main_menu_start() {
             {(uint8 *)"return ", nullptr, nullptr},
             {(uint8 *)"curquiz ", nullptr, &curquiz_id},
             {(uint8 *)"change q 1", []() { ++curquiz_id; }, nullptr},
-            {(uint8 *)"1234567890123456", nullptr, nullptr}};
+            {(uint8 *)"1234567890123456", nullptr, nullptr},
+            {(uint8 *)"pwm open/close", []() {
+                 DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 400,
+                                                  DL_TIMER_CC_0_INDEX);
+                 DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 400,
+                                                  DL_TIMER_CC_1_INDEX);
+             },
+             nullptr}};
     // 一级菜单
     MENU_PRMT MainMenu_Prmt;
     OLED_Clear();
