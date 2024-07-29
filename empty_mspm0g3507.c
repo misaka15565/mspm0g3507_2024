@@ -31,7 +31,6 @@
  */
 
 #include "driver/encoder.h"
-#include "driver/lcd.h"
 #include "driver/motor.h"
 #include "ti_msp_dl_config.h"
 #include <stdio.h>
