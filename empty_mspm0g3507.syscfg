@@ -13,6 +13,7 @@ const GPIO1         = GPIO.addInstance();
 const GPIO2         = GPIO.addInstance();
 const GPIO3         = GPIO.addInstance();
 const GPIO4         = GPIO.addInstance();
+const GPIO5         = GPIO.addInstance();
 const I2C           = scripting.addModule("/ti/driverlib/I2C", {}, false);
 const I2C1          = I2C.addInstance();
 const PWM           = scripting.addModule("/ti/driverlib/PWM", {}, false);
@@ -108,6 +109,15 @@ GPIO4.associatedPins[0].initialValue = "SET";
 GPIO4.associatedPins[1].initialValue = "SET";
 GPIO4.associatedPins[1].$name        = "S_SDA";
 GPIO4.associatedPins[1].assignedPin  = "17";
+
+GPIO5.$name                               = "KEY";
+GPIO5.associatedPins.create(2);
+GPIO5.associatedPins[0].$name             = "NEXT";
+GPIO5.associatedPins[0].launchPadShortcut = "Button3En";
+GPIO5.associatedPins[0].pin.$assign       = "PB21";
+GPIO5.associatedPins[1].$name             = "SELECT";
+GPIO5.associatedPins[1].launchPadShortcut = "Button2En";
+GPIO5.associatedPins[1].pin.$assign       = "PA18";
 
 I2C1.$name                             = "I2C_MPU6050";
 I2C1.basicEnableController             = true;

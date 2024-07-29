@@ -39,6 +39,8 @@
 #include "driver/mpu6050/inv_mpu_dmp_motion_driver.h"
 #include "driver/mpu6050/inv_mpu.h"
 #include "driver/oled.h"
+#include "driver/menu.hpp"
+#include "driver/key.hpp"
 int range_protect(int x, int low, int high) {
     return x < low ? low : (x > high ? high : x);
 }
@@ -60,6 +62,7 @@ int main(void) {
     OLED_Clear();
     OLED_ShowString(10, 5, (uint8_t *)"hello", 1);
     OLED_Refresh();
+    main_menu_start();
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
                                      DL_TIMER_CC_0_INDEX); // right
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
@@ -121,4 +124,5 @@ void TIMER_0_INST_IRQHandler(void) {
         count = 0;
     }
     update_speed_irq();
+    key_IRQHandler();
 }
