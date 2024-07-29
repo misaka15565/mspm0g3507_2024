@@ -31,12 +31,12 @@ void Menu_Display(const MENU_TABLE *menuTable, uint8 pageNo, uint8 dispNum, uint
         OLED_ShowString(site.x, site.y, menuTable[pageNo + i].MenuName, mode);
         /* 若此菜单项有需要调的参数，则显示该参数 */
         if (menuTable[pageNo + i].DebugParam != nullptr) {
-            site.x = 120;
+            site.x = 96;
             uint16 num_t = (*(menuTable[pageNo + i].DebugParam));
             OLED_ShowNum(site.x, site.y, num_t, 4, font_size, mode);
         } else {
             // 没有要调整的参数，显示空白
-            site.x = 120;
+            site.x = 96;
             OLED_ShowString(site.x, site.y, (uint8 *)"   ", mode);
         }
         mode = 1;
@@ -155,11 +155,13 @@ void Menu_Process(uint8 *menuName, MENU_PRMT *prmt, const MENU_TABLE *table, uin
 }
 
 void main_menu_start() {
+    static uint16 curquiz_id = 100;
     MENU_TABLE MainMenu_Table[] =
         {
-            {(uint8 *)"0.test ", nullptr, nullptr},
-            {(uint8 *)"1.test2 ", nullptr, nullptr},
-        };
+            {(uint8 *)"return ", nullptr, nullptr},
+            {(uint8 *)"curquiz ", nullptr, &curquiz_id},
+            {(uint8 *)"change q 1", []() { ++curquiz_id; }, nullptr},
+            {(uint8 *)"1234567890123456", nullptr, nullptr}};
     // 一级菜单
     MENU_PRMT MainMenu_Prmt;
     OLED_Clear();
