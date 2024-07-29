@@ -1,6 +1,7 @@
 #include "oled.h"
 #include "ti_msp_dl_config.h"
 #include "mpu6050/board.h"
+#include <stdarg.h>
 #define OLED_CMD 0                                                  // 写命令
 #define OLED_DATA 1                                                 // 写数据
 #define OLED_SCL_Clr() DL_GPIO_clearPins(OLED_PORT, OLED_S_SCL_PIN) // at32_led_on(I2C_SCL)
@@ -197,7 +198,7 @@ void OLED_Clear(void) {
             OLED_GRAM[n][i] = 0;
         }
     }
-    OLED_Refresh();
+    // OLED_Refresh();
 }
 
 void OLED_DrawPoint(uint8_t x, uint8_t y, uint8_t t) {
@@ -387,4 +388,18 @@ void OLED_Init(void) {
 
     OLED_Clear();
     OLED_WR_Byte(0xAF, OLED_CMD);
+}
+void oled_print(uint8_t line, char *format, ...) {
+    uint8_t y = line * 8;
+    static char tmp[64];
+    va_list args;
+    va_start(args, format);
+    vsprintf(tmp, format, args);
+
+    for (uint8_t i = strlen(tmp); i < 144 / 6; ++i) {
+        tmp[i] = ' ';        
+    }
+    tmp[144 / 6] = 0;
+    va_end(args);
+    OLED_ShowString(0, y, tmp, 1);
 }

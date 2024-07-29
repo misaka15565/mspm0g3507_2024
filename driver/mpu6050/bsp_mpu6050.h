@@ -13,7 +13,10 @@
 #define _BSP_MPU6050_H_
 
 #include "board.h"
+#include <stdint.h>
 
+extern uint32_t i2c_waitcount;
+extern uint8_t i2c_data_invalid;
 #define MPU6050_RA_SMPLRT_DIV       0x19        //陀螺仪采样率 地址
 #define MPU6050_RA_CONFIG           0x1A        //设置数字低通滤波器 地址
 #define MPU6050_RA_GYRO_CONFIG      0x1B        //陀螺仪配置寄存器

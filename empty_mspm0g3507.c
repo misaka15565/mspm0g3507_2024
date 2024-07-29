@@ -57,9 +57,7 @@ int main(void) {
     NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
     NVIC_EnableIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
     OLED_Init();
-
     OLED_Clear();
-    //  OLED_ShowNum(2, 1, 200, 4, OLED_SIZE, OLED_MODE);
     OLED_ShowString(10, 5, (uint8_t *)"hello", 1);
     OLED_Refresh();
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
@@ -68,28 +66,43 @@ int main(void) {
                                      DL_TIMER_CC_1_INDEX); // left
 
     DL_TimerG_startCounter(PWM_MOTOR_INST);
-    // lcd_log("%d\n",MPU6050_GetID());
     int angle = 0;
+    uint32_t last_time = ((volatile SysTick_Type *)SysTick)->VAL;
+    uint16_t dmp_try_count = 0;
     while (1) {
-        // DL_UART_Main_transmitData(UART_0_INST, 'c');
-        // delay_cycles(4500000);
+        uint32_t time_use = ((volatile SysTick_Type *)SysTick)->VAL;
+        oled_print(4, "time=%d", time_use);
         angle = (angle + 1) % 360;
         setAngle(angle < 180 ? angle : 360 - angle);
-        // lcd_log("angle %d\n", angle);
-        float p, r, y;
+        volatile float p, r, y;
+        p = -999;
+        r = -999;
+        y = -999;
         uint8_t status = mpu_dmp_get_data(&p, &r, &y);
-        if (status) {
-            printf("pitch %.2f roll %.2f yaw %.2f\n", p, r, y);
+        ++dmp_try_count;
+        oled_print(5, "dmp try %d", dmp_try_count);
+        if (status == 0) {
+            // printf("pitch %.2f roll %.2f yaw %.2f\n", p, r, y);
+            oled_print(0, "pitch=%.2f", p);
+            oled_print(1, "roll=%.2f", r);
+            oled_print(2, "yaw=%.2f", y);
+            oled_print(3, "wait=%d", i2c_waitcount);
+            dmp_try_count = 0;
         }
+
+        if (dmp_try_count > 100) {
+            //陀螺仪挂了，死啦
+        }
+
         int speed_B = motorB_getspeed();
         int speed_A = motorA_getspeed();
-        // lcd_show(0, "speed %d %d\n", speed_A, speed_B);
         int res_A = Velocity_A(15, speed_A);
         int res_B = Velocity_B(15, speed_B);
         res_A = range_protect(res_A, 0, 300);
         res_B = range_protect(res_B, 0, 300);
-        // lcd_show(1, "pwm %d %d\n", res_A, res_B);
         Set_PWM(res_A, res_B);
+
+        OLED_Refresh();
         continue;
         DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, res_B,
                                          DL_TIMER_CC_0_INDEX);

@@ -28,6 +28,9 @@ volatile uint32_t gTxLen, gTxCount, gRxCount, gRxLen;
 volatile uint8_t gTxPacket[128];
 volatile uint8_t gRxPacket[128];
 
+uint32_t i2c_waitcount = 0;
+static const uint32_t i2c_maxwaitcount = 720000;
+uint8_t i2c_data_invalid = 0;
 char MPU6050_WriteReg(uint8_t addr, uint8_t regaddr, uint8_t num, uint8_t *regdata) {
     uint16_t i;
 
@@ -48,18 +51,38 @@ char MPU6050_WriteReg(uint8_t addr, uint8_t regaddr, uint8_t num, uint8_t *regda
     }
 
     gI2cControllerStatus = I2C_STATUS_TX_STARTED;
-    while (!(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_IDLE))
-        ;
+    while (!(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_IDLE)) {
+        ++i2c_waitcount;
+        if (i2c_waitcount > i2c_maxwaitcount) {
+            i2c_data_invalid = 1;
+            return -1;
+        }
+    }
     DL_I2C_startControllerTransfer(I2C_MPU6050_INST, addr, DL_I2C_CONTROLLER_DIRECTION_TX, gTxLen);
 
-    while ((gI2cControllerStatus != I2C_STATUS_TX_COMPLETE) && (gI2cControllerStatus != I2C_STATUS_ERROR))
-        ;
+    while ((gI2cControllerStatus != I2C_STATUS_TX_COMPLETE) && (gI2cControllerStatus != I2C_STATUS_ERROR)) {
+        ++i2c_waitcount;
+        if (i2c_waitcount > i2c_maxwaitcount) {
+            i2c_data_invalid = 1;
+            return -1;
+        }
+    }
 
-    while (DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS)
-        ;
+    while (DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS) {
+        ++i2c_waitcount;
+        if (i2c_waitcount > i2c_maxwaitcount) {
+            i2c_data_invalid = 1;
+            return -1;
+        }
+    }
 
-    while (!(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_IDLE))
-        ;
+    while (!(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_IDLE)) {
+        ++i2c_waitcount;
+        if (i2c_waitcount > i2c_maxwaitcount) {
+            i2c_data_invalid = 1;
+            return -1;
+        }
+    }
     delay_cycles(1000);
 
     return 0;
@@ -73,26 +96,60 @@ char MPU6050_ReadData(uint8_t addr, uint8_t regaddr, uint8_t num, uint8_t *Read)
     DL_I2C_fillControllerTXFIFO(I2C_MPU6050_INST, &data[0], 1);
     DL_I2C_disableInterrupt(I2C_MPU6050_INST, DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER);
     gI2cControllerStatus = I2C_STATUS_TX_STARTED;
-    while (!(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_IDLE))
-        ;
+    i2c_data_invalid = 0;
+    i2c_waitcount = 0;
+    while (!(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_IDLE)) {
+        ++i2c_waitcount;
+        if (i2c_waitcount > i2c_maxwaitcount) {
+            i2c_data_invalid = 1;
+            return -1;
+        }
+    }
     DL_I2C_startControllerTransfer(I2C_MPU6050_INST, addr, DL_I2C_CONTROLLER_DIRECTION_TX, 1);
-    while ((gI2cControllerStatus != I2C_STATUS_TX_COMPLETE) && (gI2cControllerStatus != I2C_STATUS_ERROR))
-        ;
-    while (DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS)
-        ;
-
-    while (!(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_IDLE))
-        ;
+    i2c_waitcount = 0;
+    while ((gI2cControllerStatus != I2C_STATUS_TX_COMPLETE) && (gI2cControllerStatus != I2C_STATUS_ERROR)) {
+        ++i2c_waitcount;
+        if (i2c_waitcount > i2c_maxwaitcount) {
+            i2c_data_invalid = 1;
+            return -1;
+        }
+    }
+    i2c_waitcount = 0;
+    while (DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS) {
+        ++i2c_waitcount;
+        if (i2c_waitcount > i2c_maxwaitcount) {
+            i2c_data_invalid = 1;
+            return -1;
+        }
+    }
+    i2c_waitcount = 0;
+    while (!(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_IDLE)) {
+        ++i2c_waitcount;
+        if (i2c_waitcount > i2c_maxwaitcount) {
+            i2c_data_invalid = 1;
+            return -1;
+        }
+    }
     // delay_cycles(1000);
 
     gRxLen = num;
     gRxCount = 0;
     gI2cControllerStatus = I2C_STATUS_RX_STARTED;
     DL_I2C_startControllerTransfer(I2C_MPU6050_INST, addr, DL_I2C_CONTROLLER_DIRECTION_RX, gRxLen);
-    while (gI2cControllerStatus != I2C_STATUS_RX_COMPLETE)
-        ;
-    while (DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS)
-        ;
+    while (gI2cControllerStatus != I2C_STATUS_RX_COMPLETE) {
+        ++i2c_waitcount;
+        if (i2c_waitcount > i2c_maxwaitcount) {
+            i2c_data_invalid = 1;
+            return -1;
+        }
+    }
+    while (DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS) {
+        ++i2c_waitcount;
+        if (i2c_waitcount > i2c_maxwaitcount) {
+            i2c_data_invalid = 1;
+            return -1;
+        }
+    }
 
     for (i = 0; i < num; i++) {
         Read[i] = gRxPacket[i];
@@ -270,7 +327,6 @@ uint8_t MPU6050ReadID(void) {
  * 备       注：无
  ******************************************************************/
 char MPU6050_Init(void) {
-    
     uint8_t tmp[2];
 
     delay_ms(10);
@@ -343,6 +399,10 @@ void I2C_MPU6050_INST_IRQHandler(void) {
             /* NACK interrupt if I2C Target is disconnected */
             gI2cControllerStatus = I2C_STATUS_ERROR;
         }
+    case DL_I2C_IIDX_TIMEOUT_A:
+    case DL_I2C_IIDX_TIMEOUT_B:
+        gI2cControllerStatus = I2C_STATUS_ERROR;
+        break;
     case DL_I2C_IIDX_CONTROLLER_RXFIFO_FULL:
     case DL_I2C_IIDX_CONTROLLER_TXFIFO_EMPTY:
     case DL_I2C_IIDX_CONTROLLER_START:
