@@ -32,6 +32,7 @@ uint32_t i2c_waitcount = 0;
 static const uint32_t i2c_maxwaitcount = 720000;
 uint8_t i2c_data_invalid = 0;
 char MPU6050_WriteReg(uint8_t addr, uint8_t regaddr, uint8_t num, uint8_t *regdata) {
+    i2c_waitcount = 0;
     uint16_t i;
 
     gI2cControllerStatus = I2C_STATUS_IDLE;
@@ -89,15 +90,15 @@ char MPU6050_WriteReg(uint8_t addr, uint8_t regaddr, uint8_t num, uint8_t *regda
 }
 
 char MPU6050_ReadData(uint8_t addr, uint8_t regaddr, uint8_t num, uint8_t *Read) {
+    i2c_data_invalid = 0;
+    i2c_waitcount = 0;
     uint8_t data[2], i;
     data[0] = regaddr;
-
     gI2cControllerStatus = I2C_STATUS_IDLE;
     DL_I2C_fillControllerTXFIFO(I2C_MPU6050_INST, &data[0], 1);
     DL_I2C_disableInterrupt(I2C_MPU6050_INST, DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER);
     gI2cControllerStatus = I2C_STATUS_TX_STARTED;
-    i2c_data_invalid = 0;
-    i2c_waitcount = 0;
+
     while (!(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_IDLE)) {
         ++i2c_waitcount;
         if (i2c_waitcount > i2c_maxwaitcount) {
@@ -106,7 +107,6 @@ char MPU6050_ReadData(uint8_t addr, uint8_t regaddr, uint8_t num, uint8_t *Read)
         }
     }
     DL_I2C_startControllerTransfer(I2C_MPU6050_INST, addr, DL_I2C_CONTROLLER_DIRECTION_TX, 1);
-    i2c_waitcount = 0;
     while ((gI2cControllerStatus != I2C_STATUS_TX_COMPLETE) && (gI2cControllerStatus != I2C_STATUS_ERROR)) {
         ++i2c_waitcount;
         if (i2c_waitcount > i2c_maxwaitcount) {
@@ -114,7 +114,7 @@ char MPU6050_ReadData(uint8_t addr, uint8_t regaddr, uint8_t num, uint8_t *Read)
             return -1;
         }
     }
-    i2c_waitcount = 0;
+    
     while (DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS) {
         ++i2c_waitcount;
         if (i2c_waitcount > i2c_maxwaitcount) {
@@ -122,7 +122,7 @@ char MPU6050_ReadData(uint8_t addr, uint8_t regaddr, uint8_t num, uint8_t *Read)
             return -1;
         }
     }
-    i2c_waitcount = 0;
+   
     while (!(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_IDLE)) {
         ++i2c_waitcount;
         if (i2c_waitcount > i2c_maxwaitcount) {
