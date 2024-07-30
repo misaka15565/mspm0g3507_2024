@@ -21,6 +21,17 @@ uint16_t time_adjust = 500;
 #define S__BKPT()
 using u16 = uint16_t;
 using u8 = uint8_t;
+
+void go_problem1() {
+}
+void go_problem2() {
+}
+
+void go_problem3() {
+}
+void go_problem4() {
+}
+
 void go() {
 // #define SUDOER_DEBUG
 #ifdef SUDOER_DEBUG

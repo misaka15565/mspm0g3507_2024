@@ -193,34 +193,44 @@ void adjust_time_adjust() {
     Menu_Process((uint8 *)" -=   adjust   =- ", &subMenu1_Prmt, subMenu1_Table, menuNum);
 }
 
+void pwm_test_menu() {
+    MENU_TABLE table[] = {
+        {(uint8 *)"return ", nullptr, nullptr},
+        {(uint8 *)"close pwm", []() {
+             DL_TimerG_stopCounter(PWM_MOTOR_INST);
+         },
+         nullptr},
+        {(uint8 *)"open pwm", []() {
+             DL_TimerG_startCounter(PWM_MOTOR_INST);
+         },
+         nullptr},
+        {(uint8 *)"pwm ch0 add", []() {
+             static uint16_t pwm_val = 0;
+             pwm_val += 100;
+             pwm_val %= 1100;
+             DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, pwm_val,
+                                              DL_TIMER_CC_0_INDEX);
+         },
+         nullptr},
+        {(uint8 *)"pwm ch1 add", []() {
+             static uint16_t pwm_val = 0;
+             pwm_val += 100;
+             pwm_val %= 1100;
+             DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, pwm_val,
+                                              DL_TIMER_CC_1_INDEX);
+         },
+         nullptr},
+    };
+    MENU_PRMT prmt;
+    OLED_Clear();
+    uint8 menuNum = sizeof(table) / sizeof(table[0]); // 菜单项数
+    Menu_Process((uint8 *)" -=   pwm test   =- ", &prmt, table, menuNum);
+}
+
 void main_menu_start() {
     MENU_TABLE MainMenu_Table[] =
         {
             {(uint8 *)"return ", nullptr, nullptr},
-            {(uint8 *)"close pwm", []() {
-                 DL_TimerG_stopCounter(PWM_MOTOR_INST);
-             },
-             nullptr},
-            {(uint8 *)"open pwm", []() {
-                 DL_TimerG_startCounter(PWM_MOTOR_INST);
-             },
-             nullptr},
-            {(uint8 *)"pwm ch0 add", []() {
-                 static uint16_t pwm_val = 0;
-                 pwm_val += 100;
-                 pwm_val %= 1100;
-                 DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, pwm_val,
-                                                  DL_TIMER_CC_0_INDEX);
-             },
-             nullptr},
-            {(uint8 *)"pwm ch1 add", []() {
-                 static uint16_t pwm_val = 0;
-                 pwm_val += 100;
-                 pwm_val %= 1100;
-                 DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, pwm_val,
-                                                  DL_TIMER_CC_1_INDEX);
-             },
-             nullptr},
             {(uint8 *)"oled flush test", []() {
                  uint32_t time_start = sys_cur_tick_us;
                  for (int i = 0; i < 100; ++i) {

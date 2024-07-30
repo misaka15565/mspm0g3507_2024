@@ -1,6 +1,7 @@
 {
     "clangd.path": "C:\\ti\\ccstheia141\\ccs\\theia\\resources\\clangd\\clangd.exe",
     "clangd.arguments": [
-        "--query-driver=C:\\ti\\ccstheia141\\ccs\\tools\\compiler\\ti-cgt-armllvm_3.2.2.LTS\\bin\\tiarmclang.exe"
+        "--query-driver=C:\\ti\\ccstheia141\\ccs\\tools\\compiler\\ti-cgt-armllvm_3.2.2.LTS\\bin\\tiarmclang.exe",
+        "--header-insertion=never"
     ]
 }

@@ -1,7 +1,10 @@
 # This is an auto-generated file - do not add it to source-control
 
 CompileFlags:
+   Compiler: tiarmclang
+   Add: [--target=arm-ti-none-eabi,-D__ARMCC_VERSION=6100100,-D__ARM_COMPAT_H, -Wall，-march=thumbv6m, -mcpu=cortex-m0plus ,-mfloat-abi=soft, -mlittle-endian ,-mthumb]
    CompilationDatabase: Debug/.clangd
+   
 
 
 InlayHints:
