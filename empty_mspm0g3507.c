@@ -40,12 +40,12 @@
 #include "driver/oled.h"
 #include "driver/menu.hpp"
 #include "driver/key.hpp"
-int range_protect(int x, int low, int high) {
-    return x < low ? low : (x > high ? high : x);
-}
+#include "control.hpp"
 
+#include "utils/delay.hpp"
 int main(void) {
     SYSCFG_DL_init();
+
     board_init();
     MPU6050_Init();
     while (mpu_dmp_init()) {
@@ -69,10 +69,11 @@ int main(void) {
 
     DL_TimerG_startCounter(PWM_MOTOR_INST);
     int angle = 0;
-    uint32_t last_time = ((volatile SysTick_Type *)SysTick)->VAL;
+    uint32_t last_time = sys_cur_tick_us;
     uint16_t dmp_try_count = 0;
     while (1) {
-        uint32_t time_use = ((volatile SysTick_Type *)SysTick)->VAL;
+        uint32_t time_use = sys_cur_tick_us - last_time;
+        last_time = sys_cur_tick_us;
         oled_print(4, "time=%d", time_use);
         volatile float p, r, y;
         p = -999;
@@ -93,22 +94,13 @@ int main(void) {
         if (dmp_try_count > 100) {
             // 陀螺仪挂了，死啦
         }
-
-        int speed_B = motorB_getspeed();
-        int speed_A = motorA_getspeed();
-        int res_A = Velocity_A(30, speed_A);
-        int res_B = Velocity_B(30, speed_B);
-        res_A = range_protect(res_A, 0, 600);
-        res_B = range_protect(res_B, 0, 600);
-
-        Set_PWM(res_A, res_B);
-
         OLED_Refresh();
+
+        // 控制部分
+
+        go();
+
         continue;
-        DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, res_B,
-                                         DL_TIMER_CC_0_INDEX);
-        DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, res_A,
-                                         DL_TIMER_CC_1_INDEX);
     }
 }
 
