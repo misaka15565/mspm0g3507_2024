@@ -329,7 +329,7 @@ uint8_t MPU6050ReadID(void) {
 char MPU6050_Init(void) {
     uint8_t tmp[2];
 
-    delay_ms(10);
+    delay_ms(100);
     // 复位6050
     tmp[0] = 0x80;
     MPU6050_WriteReg(0x68, MPU6050_RA_PWR_MGMT_1, 1, tmp);

@@ -41,7 +41,7 @@
 #include "driver/menu.hpp"
 #include "driver/key.hpp"
 #include "control.hpp"
-
+#include "driver/gray_sensor.h"
 #include "utils/delay.hpp"
 int main(void) {
     SYSCFG_DL_init();
@@ -79,6 +79,7 @@ int main(void) {
         p = -999;
         r = -999;
         y = -999;
+        // 注意：即使status为0，也不代表读到的数据是正确的
         uint8_t status = mpu_dmp_get_data(&p, &r, &y);
         ++dmp_try_count;
         oled_print(5, "dmp try %d", dmp_try_count);
@@ -88,6 +89,7 @@ int main(void) {
             oled_print(1, "roll=%.2f", r);
             oled_print(2, "yaw=%.2f", y);
             oled_print(3, "wait=%d", i2c_waitcount);
+            oled_print(6, "%x", (int32_t)sensor1_res);
             dmp_try_count = 0;
         }
 
@@ -112,6 +114,7 @@ void TIMER_0_INST_IRQHandler(void) {
     if (count == 10) {
         update_speed_irq();
         key_IRQHandler();
+        gw_gray_serial_read();
         count = 0;
     }
 }

@@ -17,3 +17,7 @@ void delay_us(uint32_t us) {
 void delay_ms(uint32_t ms) {
     while (ms--) delay_us(1000);
 }
+
+void delay_us_nointerrupt(uint32_t us){
+    delay_cycles(CPUCLK_FREQ/1000000);
+}
