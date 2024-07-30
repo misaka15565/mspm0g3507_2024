@@ -39,9 +39,9 @@ void go() {
         u16 black_pos = sum / blacks_count;
         if (black_pos < 9) {
             // 若黑线在9号位置是中间，小于9说明黑线在左边
-            Kp = 0.5;
-        } else if (black_pos > 9) {
             Kp = -0.5;
+        } else if (black_pos > 9) {
+            Kp = 0.5;
         }
     }
 
