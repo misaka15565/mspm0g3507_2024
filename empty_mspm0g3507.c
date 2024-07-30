@@ -72,6 +72,7 @@ int main(void) {
     int angle = 0;
     uint32_t last_time = sys_cur_tick_us;
     uint16_t dmp_try_count = 0;
+    disable_print = 1;
     while (1) {
         uint32_t time_use = sys_cur_tick_us - last_time;
         last_time = sys_cur_tick_us;
@@ -98,8 +99,14 @@ int main(void) {
         oled_print(4, "speed A=%d B=%d", motorA_getspeed(), motorB_getspeed());
 
         // 控制部分
+        gw_gray_serial_read();
         go();
-        OLED_Refresh();
+        static uint16_t oled_count = 0;
+        ++oled_count;
+        if (oled_count == 100) {
+            // OLED_Refresh();
+            oled_count = 0;
+        }
     }
 }
 
@@ -107,7 +114,7 @@ int main(void) {
 void TIMER_0_INST_IRQHandler(void) {
     // DL_GPIO_togglePins(GPIO_B_PORT, GPIO_B_LED2_GREEN_PIN);
     static int count = 0;
-    gw_gray_serial_read();
+
     ++count;
     if (count == 10) {
         update_speed_irq();

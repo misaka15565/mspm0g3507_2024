@@ -2,9 +2,12 @@
 #include "ti_msp_dl_config.h"
 #include <cstdint>
 #include "key.hpp"
+#include "utils/delay.hpp"
+#include "control.hpp"
 extern "C" {
 #include "oled.h"
 #include "motor.h"
+#include <stdio.h>
 }
 #define PAGE_DISP_NUM 6
 
@@ -155,8 +158,26 @@ void Menu_Process(uint8 *menuName, MENU_PRMT *prmt, const MENU_TABLE *table, uin
     OLED_Clear();
 }
 
+void adjust_time_adjust() {
+    MENU_TABLE subMenu1_Table[] =
+        {
+            {(uint8 *)"return ", nullptr, nullptr},
+            {(uint8 *)"+ val", []() {
+                 ++time_adjust;
+             },
+             nullptr},
+            {(uint8 *)"- val", []() {
+                 --time_adjust;
+             },
+             nullptr},
+            {(uint8 *)"val show", nullptr, &time_adjust}};
+    MENU_PRMT subMenu1_Prmt;
+    OLED_Clear();
+    uint8 menuNum = sizeof(subMenu1_Table) / sizeof(subMenu1_Table[0]); // 菜单项数
+    Menu_Process((uint8 *)" -=   adjust   =- ", &subMenu1_Prmt, subMenu1_Table, menuNum);
+}
+
 void main_menu_start() {
-    static uint16 curquiz_id = 100;
     MENU_TABLE MainMenu_Table[] =
         {
             {(uint8 *)"return ", nullptr, nullptr},
@@ -183,7 +204,16 @@ void main_menu_start() {
                  DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, pwm_val,
                                                   DL_TIMER_CC_1_INDEX);
              },
-             nullptr}};
+             nullptr},
+            {(uint8 *)"oled flush test", []() {
+                 uint32_t time_start = sys_cur_tick_us;
+                 for (int i = 0; i < 100; ++i) {
+                     OLED_Refresh();
+                 }
+                 printf("%d\n", sys_cur_tick_us - time_start);
+             },
+             nullptr},
+            {(uint8 *)"adjust time adjust", adjust_time_adjust, nullptr}};
     // 一级菜单
     MENU_PRMT MainMenu_Prmt;
     OLED_Clear();
