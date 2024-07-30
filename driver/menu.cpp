@@ -4,6 +4,7 @@
 #include "key.hpp"
 extern "C" {
 #include "oled.h"
+#include "motor.h"
 }
 #define PAGE_DISP_NUM 6
 

@@ -4,12 +4,17 @@ extern "C" {
 #include "driver/gray_sensor.h"
 }
 
-// 认为sensor1是前面的
+// sensor1是前面的
 int range_protect(int x, int low, int high) {
     return x < low ? low : (x > high ? high : x);
 }
 // 0-7 --> 1-8
 #define sensor1_get(x) GET_NTH_BIT(sensor1_res, x + 1)
+
+//对于传感器2（后面那个），8号检测在车的左后方，给转换成0号，这样和前面是统一的
+// 0-7 --> 8-1
+#define sensor2_get(x) GET_NTH_BIT(sensor2_res, 8 - x);
+
 using u16 = uint16_t;
 using u8 = uint8_t;
 void go() {

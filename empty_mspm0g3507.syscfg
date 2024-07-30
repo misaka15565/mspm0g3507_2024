@@ -24,6 +24,7 @@ const SYSCTL        = scripting.addModule("/ti/driverlib/SYSCTL");
 const SYSTICK       = scripting.addModule("/ti/driverlib/SYSTICK");
 const TIMER         = scripting.addModule("/ti/driverlib/TIMER", {}, false);
 const TIMER1        = TIMER.addInstance();
+const TIMER2        = TIMER.addInstance();
 const ProjectConfig = scripting.addModule("/ti/project_config/ProjectConfig");
 
 /**
@@ -189,14 +190,23 @@ SYSTICK.interruptEnable   = true;
 SYSTICK.interruptPriority = "0";
 SYSTICK.period            = 80;
 
-TIMER1.$name             = "TIMER_0";
-TIMER1.interrupts        = ["ZERO"];
-TIMER1.timerClkDiv       = 8;
-TIMER1.timerMode         = "PERIODIC_UP";
-TIMER1.timerStartTimer   = true;
-TIMER1.timerPeriod       = "1 ms";
-TIMER1.timerClkPrescale  = 100;
-TIMER1.interruptPriority = "3";
+TIMER1.$name              = "TIMER_0";
+TIMER1.interrupts         = ["ZERO"];
+TIMER1.timerClkDiv        = 8;
+TIMER1.timerMode          = "PERIODIC_UP";
+TIMER1.timerStartTimer    = true;
+TIMER1.timerPeriod        = "1 ms";
+TIMER1.timerClkPrescale   = 100;
+TIMER1.interruptPriority  = "3";
+TIMER1.peripheral.$assign = "TIMA0";
+
+TIMER2.$name              = "TIMER_1";
+TIMER2.timerClkDiv        = 8;
+TIMER2.timerMode          = "PERIODIC_UP";
+TIMER2.timerClkPrescale   = 10;
+TIMER2.timerPeriod        = "10 ms";
+TIMER2.timerStartTimer    = true;
+TIMER2.peripheral.$assign = "TIMA1";
 
 ProjectConfig.deviceSpin = "MSPM0G3507";
 
@@ -214,4 +224,3 @@ GPIO3.associatedPins[3].pin.$suggestSolution = "PB27";
 GPIO4.associatedPins[1].pin.$suggestSolution = "PA17";
 GPIO6.associatedPins[0].pin.$suggestSolution = "PA13";
 GPIO6.associatedPins[1].pin.$suggestSolution = "PA14";
-TIMER1.peripheral.$suggestSolution           = "TIMA0";

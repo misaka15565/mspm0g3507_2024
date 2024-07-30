@@ -82,24 +82,21 @@ int main(void) {
         // 注意：即使status为0，也不代表读到的数据是正确的
         uint8_t status = mpu_dmp_get_data(&p, &r, &y);
         ++dmp_try_count;
-        oled_print(5, "dmp try %d", dmp_try_count);
+        oled_print(2, "dmp try %d", dmp_try_count);
         if (status == 0) {
             // printf("pitch %.2f roll %.2f yaw %.2f\n", p, r, y);
-            oled_print(0, "pitch=%.2f", p);
-            oled_print(1, "roll=%.2f", r);
-            oled_print(2, "yaw=%.2f", y);
-            oled_print(3, "wait=%d", i2c_waitcount);
-            oled_print(6, "1:%02X 2:%02X", (int32_t)sensor1_res, (int32_t)sensor2_res);
+            oled_print(0, "pitch=%.2f roll=%.2f", p, r);
+            oled_print(1, "yaw=%.2f wait=%d", y, i2c_waitcount);
             dmp_try_count = 0;
         }
-
         if (dmp_try_count > 100) {
             // 陀螺仪挂了，死啦
         }
+        oled_print(6, "1:%02X 2:%02X", (int32_t)sensor1_res, (int32_t)sensor2_res);
+        oled_print(7, "speed A=%d B=%d", motorA_getspeed(), motorB_getspeed());
+
         OLED_Refresh();
-
         // 控制部分
-
         go();
     }
 }
