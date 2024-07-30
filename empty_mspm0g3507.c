@@ -68,19 +68,21 @@ int main(void) {
 
     DL_TimerG_startCounter(PWM_MOTOR_INST);
     main_menu_start();
+    OLED_Clear();
     int angle = 0;
     uint32_t last_time = sys_cur_tick_us;
     uint16_t dmp_try_count = 0;
     while (1) {
         uint32_t time_use = sys_cur_tick_us - last_time;
         last_time = sys_cur_tick_us;
-        oled_print(4, "time=%d", time_use);
+        oled_print(7, "time=%d", time_use);
         volatile float p, r, y;
         p = -999;
         r = -999;
         y = -999;
         // 注意：即使status为0，也不代表读到的数据是正确的
-        uint8_t status = mpu_dmp_get_data(&p, &r, &y);
+        /*
+         uint8_t status = mpu_dmp_get_data(&p, &r, &y);
         ++dmp_try_count;
         oled_print(2, "dmp try %d", dmp_try_count);
         if (status == 0) {
@@ -88,16 +90,16 @@ int main(void) {
             oled_print(0, "pitch=%.2f roll=%.2f", p, r);
             oled_print(1, "yaw=%.2f wait=%d", y, i2c_waitcount);
             dmp_try_count = 0;
-        }
+        }*/
         if (dmp_try_count > 100) {
             // 陀螺仪挂了，死啦
         }
-        oled_print(6, "1:%02X 2:%02X", (int32_t)sensor1_res, (int32_t)sensor2_res);
-        oled_print(7, "speed A=%d B=%d", motorA_getspeed(), motorB_getspeed());
+        oled_print(3, "sensor 1:%02X 2:%02X", (int32_t)sensor1_res, (int32_t)sensor2_res);
+        oled_print(4, "speed A=%d B=%d", motorA_getspeed(), motorB_getspeed());
 
-        OLED_Refresh();
         // 控制部分
         go();
+        OLED_Refresh();
     }
 }
 

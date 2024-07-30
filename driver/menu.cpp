@@ -160,20 +160,26 @@ void main_menu_start() {
     MENU_TABLE MainMenu_Table[] =
         {
             {(uint8 *)"return ", nullptr, nullptr},
-            {(uint8 *)"flush speed ", []() {
-                 oled_print(8, "A=%d B=%d", motorA_getspeed(), motorB_getspeed());
+            {(uint8 *)"close pwm", []() {
+                 DL_TimerG_stopCounter(PWM_MOTOR_INST);
              },
              nullptr},
-            {(uint8 *)"pwm ch0 open/close", []() {
-                 static uint16_t pwm_val = 400;
-                 pwm_val = 400 - pwm_val;
+            {(uint8 *)"open pwm", []() {
+                 DL_TimerG_startCounter(PWM_MOTOR_INST);
+             },
+             nullptr},
+            {(uint8 *)"pwm ch0 add", []() {
+                 static uint16_t pwm_val = 0;
+                 pwm_val += 100;
+                 pwm_val %= 1100;
                  DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, pwm_val,
                                                   DL_TIMER_CC_0_INDEX);
              },
              nullptr},
-            {(uint8 *)"pwm ch1 open/close", []() {
-                 static uint16_t pwm_val = 400;
-                 pwm_val = 400 - pwm_val;
+            {(uint8 *)"pwm ch1 add", []() {
+                 static uint16_t pwm_val = 0;
+                 pwm_val += 100;
+                 pwm_val %= 1100;
                  DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, pwm_val,
                                                   DL_TIMER_CC_1_INDEX);
              },
