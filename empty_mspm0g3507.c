@@ -110,11 +110,11 @@ int main(void) {
 void TIMER_0_INST_IRQHandler(void) {
     // DL_GPIO_togglePins(GPIO_B_PORT, GPIO_B_LED2_GREEN_PIN);
     static int count = 0;
+    gw_gray_serial_read();
     ++count;
     if (count == 10) {
         update_speed_irq();
         key_IRQHandler();
-        gw_gray_serial_read();
         count = 0;
     }
 }

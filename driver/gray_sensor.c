@@ -47,13 +47,6 @@
 /* 读取固件版本号 */
 #define GW_GRAY_FIRMWARE 0xC1
 
-/**
- * @brief 从I2C得到的8位的数字信号的数据 读取第n位的数据
- * @param sensor_value_8 数字IO的数据
- * @param n 第1位从1开始, n=1 是传感器的第一个探头数据, n=8是最后一个
- * @return
- */
-#define GET_NTH_BIT(sensor_value, nth_bit) (((sensor_value) >> ((nth_bit)-1)) & 0x01)
 
 /**
  * @brief 从一个变量分离出所有的bit
@@ -75,7 +68,7 @@
 
 /* 广播重置地址所需要发的数据 */
 #define GW_GRAY_BROADCAST_RESET "\xB8\xD0\xCE\xAA\xBF\xC6\xBC\xBC"
-volatile uint8_t sensor1_res=0;
+volatile uint8_t sensor1_res=0;//每bit 8 7 6 5 4 3 2 1号的数据
 volatile uint8_t sensor2_res=0;
 void gw_gray_serial_read() {
     uint8_t ret1 = 0;
