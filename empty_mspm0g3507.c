@@ -43,6 +43,8 @@
 #include "control.hpp"
 #include "driver/gray_sensor.h"
 #include "utils/delay.hpp"
+#include "speed.hpp"
+#include "driver/BEEP.h"
 int main(void) {
     SYSCFG_DL_init();
 
@@ -72,11 +74,12 @@ int main(void) {
     int angle = 0;
     uint32_t last_time = sys_cur_tick_us;
     uint16_t dmp_try_count = 0;
-    disable_print = 1;
+    disable_print = 0;
     while (1) {
         uint32_t time_use = sys_cur_tick_us - last_time;
         last_time = sys_cur_tick_us;
         oled_print(7, "time=%d", time_use);
+        oled_print(5, "pwm %d %d", res_A, res_B);
         volatile float p, r, y;
         p = -999;
         r = -999;
@@ -102,11 +105,7 @@ int main(void) {
         gw_gray_serial_read();
         go();
         static uint16_t oled_count = 0;
-        ++oled_count;
-        if (oled_count == 100) {
-            // OLED_Refresh();
-            oled_count = 0;
-        }
+        OLED_Refresh();
     }
 }
 
@@ -114,10 +113,11 @@ int main(void) {
 void TIMER_0_INST_IRQHandler(void) {
     // DL_GPIO_togglePins(GPIO_B_PORT, GPIO_B_LED2_GREEN_PIN);
     static int count = 0;
-
+    BEEP_IRQ();
     ++count;
     if (count == 10) {
         update_speed_irq();
+        speed_pid_irqHandler();
         key_IRQHandler();
         count = 0;
     }

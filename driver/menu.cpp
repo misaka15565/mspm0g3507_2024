@@ -170,6 +170,22 @@ void adjust_time_adjust() {
                  --time_adjust;
              },
              nullptr},
+            {(uint8 *)"+10 val", []() {
+                 time_adjust += 10;
+             },
+             nullptr},
+            {(uint8 *)"-10 val", []() {
+                 time_adjust -= 10;
+             },
+             nullptr},
+            {(uint8 *)"+100 val", []() {
+                 time_adjust += 100;
+             },
+             nullptr},
+            {(uint8 *)"-100 val", []() {
+                 time_adjust -= 100;
+             },
+             nullptr},
             {(uint8 *)"val show", nullptr, &time_adjust}};
     MENU_PRMT subMenu1_Prmt;
     OLED_Clear();

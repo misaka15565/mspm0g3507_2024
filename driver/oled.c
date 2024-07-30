@@ -2,6 +2,7 @@
 #include "ti_msp_dl_config.h"
 #include "mpu6050/board.h"
 #include <stdarg.h>
+#include <stdio.h>
 uint8_t disable_print = 0;
 #define OLED_CMD 0                                                  // 写命令
 #define OLED_DATA 1                                                 // 写数据
@@ -174,6 +175,7 @@ void OLED_DisPlay_Off(void) {
 }
 
 void OLED_Refresh(void) {
+    if (disable_print) return;
     uint8_t i, n;
     for (i = 0; i < 8; i++) {
         OLED_WR_Byte(0xb0 + i, OLED_CMD);
@@ -393,7 +395,7 @@ void OLED_Init(void) {
 void oled_print(uint8_t line, char *format, ...) {
     if (disable_print) return;
     uint8_t y = line * 8;
-    static char tmp[64];
+    static char tmp[256];
     va_list args;
     va_start(args, format);
     vsprintf(tmp, format, args);
