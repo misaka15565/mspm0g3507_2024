@@ -12,6 +12,6 @@
 	<activeTargetConfiguration value="targetConfigs/MSPM0G3507.ccxml"/>
 	<isTargetConfigurationManual value="false"/>
 	<sourceLookupPath value="${COM_TI_MSPM0_SDK_INSTALL_DIR}/source/ti/driverlib"/>
-	<origin value="//rog-x13/hhj/workspace_ccstheia/empty_mspm0g3507_nortos_ticlang"/>
+	<origin value="C:/Users/86181/Desktop/mspm0g3507_2024"/>
 	<filesToOpen value="empty_mspm0g3507.syscfg,README.md"/>
 </projectOptions>
