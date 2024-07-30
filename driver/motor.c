@@ -69,6 +69,10 @@ int Velocity_B(int TargetVelocity, int CurrentVelocity) {
     return ControlVelocityB; // 返回速度控制值
 }
 
+
+//ch0 左电机 
+//ch1 右电机
+
 void Set_PWM(int pwma, int pwmb) {
     const DL_TIMER_CC_INDEX motorA = DL_TIMER_CC_0_INDEX;
     const DL_TIMER_CC_INDEX motorB = DL_TIMER_CC_1_INDEX;

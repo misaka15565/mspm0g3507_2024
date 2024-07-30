@@ -32,7 +32,7 @@ void go() {
         }
     }
 
-    if (black_count == 0) {
+    if (blacks_count == 0) {
         // 未检测到黑线
         // TODO
     } else {

@@ -5,7 +5,7 @@
 extern "C" {
 #include "oled.h"
 }
-#define PAGE_DISP_NUM 7
+#define PAGE_DISP_NUM 6
 
 using uint16 = uint16_t;
 using uint8 = uint8_t;
@@ -159,13 +159,21 @@ void main_menu_start() {
     MENU_TABLE MainMenu_Table[] =
         {
             {(uint8 *)"return ", nullptr, nullptr},
-            {(uint8 *)"curquiz ", nullptr, &curquiz_id},
-            {(uint8 *)"change q 1", []() { ++curquiz_id; }, nullptr},
-            {(uint8 *)"1234567890123456", nullptr, nullptr},
-            {(uint8 *)"pwm open/close", []() {
-                 DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 400,
+            {(uint8 *)"flush speed ", []() {
+                 oled_print(8, "A=%d B=%d", motorA_getspeed(), motorB_getspeed());
+             },
+             nullptr},
+            {(uint8 *)"pwm ch0 open/close", []() {
+                 static uint16_t pwm_val = 400;
+                 pwm_val = 400 - pwm_val;
+                 DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, pwm_val,
                                                   DL_TIMER_CC_0_INDEX);
-                 DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 400,
+             },
+             nullptr},
+            {(uint8 *)"pwm ch1 open/close", []() {
+                 static uint16_t pwm_val = 400;
+                 pwm_val = 400 - pwm_val;
+                 DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, pwm_val,
                                                   DL_TIMER_CC_1_INDEX);
              },
              nullptr}};

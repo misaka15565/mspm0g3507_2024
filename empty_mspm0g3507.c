@@ -61,13 +61,13 @@ int main(void) {
     OLED_Clear();
     OLED_ShowString(10, 5, (uint8_t *)"hello", 1);
     OLED_Refresh();
-    main_menu_start();
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
                                      DL_TIMER_CC_0_INDEX); // right
     DL_TimerG_setCaptureCompareValue(PWM_MOTOR_INST, 0,
                                      DL_TIMER_CC_1_INDEX); // left
 
     DL_TimerG_startCounter(PWM_MOTOR_INST);
+    main_menu_start();
     int angle = 0;
     uint32_t last_time = sys_cur_tick_us;
     uint16_t dmp_try_count = 0;
@@ -89,7 +89,7 @@ int main(void) {
             oled_print(1, "roll=%.2f", r);
             oled_print(2, "yaw=%.2f", y);
             oled_print(3, "wait=%d", i2c_waitcount);
-            oled_print(6, "%x", (int32_t)sensor1_res);
+            oled_print(6, "1:%02X 2:%02X", (int32_t)sensor1_res, (int32_t)sensor2_res);
             dmp_try_count = 0;
         }
 
@@ -101,8 +101,6 @@ int main(void) {
         // 控制部分
 
         go();
-
-        continue;
     }
 }
 
