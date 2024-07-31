@@ -138,10 +138,10 @@ void TIMER_0_INST_IRQHandler(void) {
     // DL_GPIO_togglePins(GPIO_B_PORT, GPIO_B_LED2_GREEN_PIN);
     static int count = 0;
     BEEP_IRQ();
+    update_speed_irq();
+    speed_pid_irqHandler();
     ++count;
     if (count == 10) {
-        update_speed_irq();
-        speed_pid_irqHandler();
         key_IRQHandler();
         count = 0;
     }

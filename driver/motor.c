@@ -9,13 +9,23 @@ float Velcity_Kp = 1.0, Velcity_Ki = 0.5, Velcity_Kd; // 相关速度PID参数
 入口参数：左右电机的编码器值
 返回值  ：电机的PWM
 ***************************************************************************/
+static volatile int distanceA_buffer[10] = {};
+static volatile int distanceB_buffer[10] = {};
+static volatile int distanceA_buffer_index = 0;
+static volatile int distanceB_buffer_index = 0;
+
 volatile int speed_B = 0;
 volatile int speed_A = 0;
+// 每ms获取一次累计脉冲数，以本次获取的值减去上10ms的值，得到速度
 void update_speed_irq() {
-    speed_B = encoderB_get();
-    encoderB_clear();
-    speed_A = encoderA_get();
-    encoderA_clear();
+    int last_10ms_distance_A = distanceA_buffer[distanceA_buffer_index];
+    int last_10ms_distance_B = distanceB_buffer[distanceB_buffer_index];
+    distanceA_buffer[distanceA_buffer_index] = encoderA_get();
+    distanceB_buffer[distanceB_buffer_index] = encoderB_get();
+    distanceA_buffer_index = (distanceA_buffer_index + 1) % 10;
+    distanceB_buffer_index = (distanceB_buffer_index + 1) % 10;
+    speed_A = distanceA_buffer[distanceA_buffer_index] - last_10ms_distance_A;
+    speed_B = distanceB_buffer[distanceB_buffer_index] - last_10ms_distance_B;
 }
 int motorB_getspeed() {
     return -speed_B;
