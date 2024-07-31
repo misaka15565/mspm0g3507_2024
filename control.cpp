@@ -186,7 +186,7 @@ void go_problem2() {
     }
     PID_clear_A();
     PID_clear_B();
-    delay_ms(1000);
+    //delay_ms(1000);
     // C-->D
     uint32_t start_time_C = sys_cur_tick_us;
     oled_print(0, "C->D");
