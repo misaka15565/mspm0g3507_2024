@@ -341,7 +341,7 @@ char MPU6050_Init(void) {
 
     MPU_Set_Gyro_Fsr(3);  // 陀螺仪传感器,±2000dps
     MPU_Set_Accel_Fsr(0); // 加速度传感器,±2g
-    MPU_Set_Rate(50);
+    MPU_Set_Rate(1000);
 
     MPU6050_WriteReg(0x68, MPU_INT_EN_REG, 1, tmp);    // 关闭所有中断
     MPU6050_WriteReg(0x68, MPU_USER_CTRL_REG, 1, tmp); // I2C主模式关闭
@@ -355,7 +355,7 @@ char MPU6050_Init(void) {
         MPU6050_WriteReg(0x68, MPU6050_RA_PWR_MGMT_1, 1, tmp); // 设置CLKSEL,PLL X轴为参考
         tmp[0] = 0x00;
         MPU6050_WriteReg(0x68, MPU_PWR_MGMT2_REG, 1, tmp); // 加速度与陀螺仪都工作
-        MPU_Set_Rate(50);
+        MPU_Set_Rate(1000);
         return 1;
     }
     return 0;

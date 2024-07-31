@@ -55,6 +55,7 @@ void mpu6050_prepare() {
         uint8_t status;
         for (int i = 0; i < 100; i++) {
             status = mpu_dmp_get_data(&p, &r, &y);
+            if (status != 0) --i;
             start_y[i] = y;
         }
         for (int j = 1; j < 100; j++) {
@@ -98,18 +99,18 @@ float angle_add(float a, float b) {
 
 float system_yaw = 0;
 
-//893us
+// 893us
 void mpu6050_updateYaw() {
     static float yaw_buffer[3] = {};
     float p, r, y;
     p = -999;
     r = -999;
     y = -999;
-    uint8_t status = mpu_dmp_get_data(&p, &r, &y);
-    if (status == 0) {
-        yaw_buffer[2] = yaw_buffer[1];
-        yaw_buffer[1] = yaw_buffer[0];
-        yaw_buffer[0] = y;
-        system_yaw = (yaw_buffer[0] + yaw_buffer[1] + yaw_buffer[2]) / 3.0;
+    for (int i = 0; i < 100; ++i) {
+        uint8 status = mpu_dmp_get_data(&p, &r, &y);
+        if (status == 0) {
+            system_yaw = y;
+            break;
+        }
     }
 }

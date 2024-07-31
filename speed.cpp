@@ -24,7 +24,6 @@ void set_target_speed(int l, int r) {
     OLED_Refresh();
 }
 
-
 static bool en_acclimit = true;
 
 void enable_acclimit() {
@@ -85,4 +84,30 @@ void speed_pid_irqHandler() {
     res_A = range_protect(res_A, 0, max_pwm);
     res_B = range_protect(res_B, 0, max_pwm);
     Set_PWM(res_A, res_B);
+}
+
+void motor_L_run_distance(int distance) {
+    int left = encoderA_get();
+    int right = encoderB_get();
+    set_target_speed(1, 0);
+    while (1) {
+        if (abs(encoderA_get() - left) > distance) {
+            Set_PWM(0, 0);
+            break;
+        }
+    }
+    set_target_speed(0, 0);
+}
+
+void motor_R_run_distance(int distance) {
+    int left = encoderA_get();
+    int right = encoderB_get();
+    set_target_speed(0, 1);
+    while (1) {
+        if (abs(encoderB_get() - right) > distance) {
+            Set_PWM(0, 0);
+            break;
+        }
+    }
+    set_target_speed(0, 0);
 }
