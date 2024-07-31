@@ -229,6 +229,38 @@ void pwm_test_menu() {
     Menu_Process((uint8 *)" -=   pwm test   =- ", &prmt, table, menuNum);
 }
 
+static uint16 kp_mul_100 = 0;
+static uint16 ki_mul_100 = 0;
+
+void pid_adjust_menu() {
+    kp_mul_100 = Velcity_Kp * 100;
+    ki_mul_100 = Velcity_Ki * 100;
+    MENU_TABLE table[] = {
+        {(uint8 *)"return ", nullptr, nullptr},
+        {(uint8 *)"kp*100 ++", []() {
+             ++kp_mul_100;
+         },
+         &kp_mul_100},
+        {(uint8 *)"ki*100 ++", []() {
+             ++ki_mul_100;
+         },
+         &ki_mul_100},
+        {(uint8 *)"kp*100 --", []() {
+             --kp_mul_100;
+         },
+         &kp_mul_100},
+        {(uint8 *)"ki*100 --", []() {
+             --ki_mul_100;
+         },
+         &ki_mul_100}};
+    MENU_PRMT prmt;
+    OLED_Clear();
+    uint8 menuNum = sizeof(table) / sizeof(table[0]); // 菜单项数
+    Menu_Process((uint8 *)" -=   pid adjust   =- ", &prmt, table, menuNum);
+    Velcity_Kp = (float)kp_mul_100 / 100.0;
+    Velcity_Ki = (float)ki_mul_100 / 100.0;
+}
+static bool close_oled_while_run = true;
 // 有捕获的lambda不能转为void(*)()函数指针，所以就这样放着吧
 static uint16 now_problem_id = now_problem;
 void main_menu_start() {
@@ -256,19 +288,18 @@ void main_menu_start() {
              },
              nullptr},
             {(uint8 *)"now problem is", nullptr, &now_problem_id},
-            {(uint8 *)"oled flush test", []() {
-                 uint32_t time_start = sys_cur_tick_us;
-                 for (int i = 0; i < 100; ++i) {
-                     OLED_Refresh();
-                 }
-                 oled_print(0, "%d\n", sys_cur_tick_us - time_start);
-                 delay_ms(1000);
+            {(uint8 *)"keep oled open", []() {
+                 close_oled_while_run = false;
              },
              nullptr},
-            {(uint8 *)"adjust time adjust", adjust_time_adjust, nullptr}};
+            {(uint8 *)"pid adjust", pid_adjust_menu, nullptr}};
     // 一级菜单
     MENU_PRMT MainMenu_Prmt;
     OLED_Clear();
     uint8 menuNum = sizeof(MainMenu_Table) / sizeof(MainMenu_Table[0]); // 菜单项数
     Menu_Process((uint8 *)" -=   Setting   =- ", &MainMenu_Prmt, MainMenu_Table, menuNum);
+
+    if (close_oled_while_run) {
+        oled_disable_print = 1;
+    }
 }

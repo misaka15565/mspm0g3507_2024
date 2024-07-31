@@ -62,7 +62,7 @@ void go_problem1() {
     constexpr u16 speed_default = 15;
     // 记录当前时间
     uint32_t start_time = sys_cur_tick_us;
-
+    enable_acclimit();
     while (true) {
         // 传感器更新
         gw_gray_serial_read();
@@ -92,16 +92,17 @@ void go_problem1() {
 // 点，再由 C 点自动行驶到 D 点，最后沿半弧线行驶到 A 点停车，每经过一个点，
 // 声光提示一次。完成一圈用时不大于 30 秒。（
 void go_problem2() {
-    constexpr u16 default_mid_speed = 10; // 默认直行速度
-    constexpr u16 default_left_speed = 10;
+    constexpr u16 default_mid_speed = 15; // 默认直行速度
+    constexpr u16 default_left_speed = 15;
     constexpr u16 default_right_speed = 10;
-    constexpr u16 offset_speed = 4;
+    constexpr u16 offset_speed = 6;
     float scale = 0;
 
     // A-->B
     uint32_t start_time_A = sys_cur_tick_us;
     oled_print(0, "A->B");
     OLED_Refresh();
+    enable_acclimit();
     while (true) {
         // 传感器更新
         gw_gray_serial_read();
@@ -126,6 +127,7 @@ void go_problem2() {
     // B-->C，寻迹
     oled_print(0, "B->C");
     OLED_Refresh();
+    disable_acclimit();
     while (true) {
         float scale = 0;
         // 传感器更新
@@ -145,13 +147,7 @@ void go_problem2() {
             // 检测到黑线
             // 根据黑线位置调整车的状态
             // 黑线在中间则位置是7
-            if (blackline_pos1 < 7) {
-                scale = -0.5;
-            } else if (blackline_pos1 > 7) {
-                scale = 0.5;
-            } else {
-                scale = 0;
-            }
+            scale = (blackline_pos1 - 7) * 0.2;
             // 希望后传感器也是黑线在中间
             /*
             if (blackline_pos2 < 7) {
@@ -190,10 +186,14 @@ void go_problem2() {
             set_target_speed(1, 0);
         }
     }
-    // C-->D
+    PID_clear_A();
+    PID_clear_B();
+    // delay_ms(1000);
+    //  C-->D
     uint32_t start_time_C = sys_cur_tick_us;
     oled_print(0, "C->D");
     OLED_Refresh();
+    enable_acclimit();
     while (true) {
         // 传感器更新
         gw_gray_serial_read();
@@ -218,6 +218,7 @@ void go_problem2() {
     // D-->A，寻迹
     oled_print(0, "D->A");
     OLED_Refresh();
+    disable_acclimit();
     while (true) {
         float scale = 0;
         // 传感器更新
@@ -237,13 +238,7 @@ void go_problem2() {
             // 检测到黑线
             // 根据黑线位置调整车的状态
             // 黑线在中间则位置是7
-            if (blackline_pos1 < 7) {
-                scale = -0.5;
-            } else if (blackline_pos1 > 7) {
-                scale = 0.5;
-            } else {
-                scale = 0;
-            }
+            scale = (blackline_pos1 - 7) * 0.2;
             // 希望后传感器也是黑线在中间
             /*
             if (blackline_pos2 < 7) {

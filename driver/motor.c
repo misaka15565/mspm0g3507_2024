@@ -34,11 +34,10 @@ int motorB_getspeed() {
 int motorA_getspeed() {
     return abs(speed_A);
 }
-
+static int ControlVelocityA,
+    Last_biasA; // 静态变量，函数调用结束后其值依然存在
 int Velocity_A(int TargetVelocity, int CurrentVelocity) {
     int Bias; // 定义相关变量
-    static int ControlVelocityA,
-        Last_biasA; // 静态变量，函数调用结束后其值依然存在
 
     Bias = TargetVelocity - CurrentVelocity; // 求速度偏差
 
@@ -54,7 +53,8 @@ int Velocity_A(int TargetVelocity, int CurrentVelocity) {
         ControlVelocityA = -999;
     return ControlVelocityA; // 返回速度控制值
 }
-
+static int ControlVelocityB,
+    Last_biasB; // 静态变量，函数调用结束后其值依然存在
 /***************************************************************************
 函数功能：电机的PID闭环控制
 入口参数：左右电机的编码器值
@@ -62,8 +62,6 @@ int Velocity_A(int TargetVelocity, int CurrentVelocity) {
 ***************************************************************************/
 int Velocity_B(int TargetVelocity, int CurrentVelocity) {
     int Bias; // 定义相关变量
-    static int ControlVelocityB,
-        Last_biasB; // 静态变量，函数调用结束后其值依然存在
 
     Bias = TargetVelocity - CurrentVelocity; // 求速度偏差
 
@@ -88,4 +86,12 @@ void Set_PWM(int pwma, int pwmb) {
     const DL_TIMER_CC_INDEX motorB = DL_TIMER_CC_1_INDEX;
     DL_TimerA_setCaptureCompareValue(PWM_MOTOR_INST, pwma, motorA);
     DL_TimerA_setCaptureCompareValue(PWM_MOTOR_INST, pwmb, motorB);
+}
+void PID_clear_A() {
+    ControlVelocityA = 0;
+    Last_biasA = 0;
+}
+void PID_clear_B() {
+    ControlVelocityB = 0;
+    Last_biasB = 0;
 }
