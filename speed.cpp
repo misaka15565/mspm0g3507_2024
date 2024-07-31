@@ -22,7 +22,7 @@ void speed_pid_irqHandler() {
     int speed_B = motorB_getspeed();
     res_A = Velocity_A(tarsL, speed_A);
     res_B = Velocity_B(tarsR, speed_B);
-    res_A = range_protect(res_A, 1, 1000);
-    res_B = range_protect(res_B, 1, 1000);
+    res_A = range_protect(res_A, 0, 1000);
+    res_B = range_protect(res_B, 0, 1000);
     Set_PWM(res_A, res_B);
 }
