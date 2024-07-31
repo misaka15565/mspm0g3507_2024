@@ -9,5 +9,6 @@ int motorA_getspeed();
 int motorB_getspeed();
 void PID_clear_A();
 void PID_clear_B();
+void distance_buffer_clear();
 extern float Velcity_Kp, Velcity_Ki, Velcity_Kd;
 #endif

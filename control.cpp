@@ -27,7 +27,7 @@ using i16 = int16_t;
 
 float weight_front = 0.15;
 float weight_mid = 0.07;
-uint16_t distance_adjust_after_leave_blackline = 2;
+uint16_t distance_adjust_after_leave_blackline = 0;
 
 // 返回-1说明没黑线
 // 0是黑线在传感器最左，14是黑线在传感器最右

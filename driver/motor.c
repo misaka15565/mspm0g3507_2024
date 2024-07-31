@@ -17,6 +17,15 @@ static volatile int distanceB_buffer_index = 0;
 
 static volatile int speed_B = 0;
 static volatile int speed_A = 0;
+
+void distance_buffer_clear(){
+    for(int i = 0; i < 10; i++){
+        distanceA_buffer[i] = 0;
+        distanceB_buffer[i] = 0;
+    }
+}
+
+
 // 每ms获取一次累计脉冲数，以本次获取的值减去上10ms的值，得到速度
 void update_speed_irq() {
     int last_10ms_distance_A = distanceA_buffer[distanceA_buffer_index];

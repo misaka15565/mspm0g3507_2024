@@ -490,10 +490,19 @@ void main_menu_start() {
             {(uint8 *)"run cur prob", []() {
                  PID_clear_A();
                  PID_clear_B();
+                 set_target_speed(0, 0);
+                 DL_TimerG_stopCounter(PWM_MOTOR_INST);
+                 NVIC_DisableIRQ(TIMER_0_INST_INT_IRQN);
+                 encoderA_clear();
+                 encoderB_clear();
+                 distance_buffer_clear();
+                 NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
                  if (close_oled_while_run) {
                      oled_disable_print = 1;
                  }
-                 delay_ms(1000);
+                 delay_ms(500);
+                 DL_TimerG_startCounter(PWM_MOTOR_INST);
+                 delay_ms(500);
                  switch (now_problem) {
                  case problem_1:
                      go_problem1();
