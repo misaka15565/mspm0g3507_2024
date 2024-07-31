@@ -74,3 +74,17 @@ void mpu6050_prepare() {
         }
     }
 }
+
+float mpu60550_JDX(float ny,float ty)//ny为当前偏航角，ty为目标偏航角
+{
+    float zj = ny - ty;
+    if(zj < -180)
+    {
+        zj = 360 + zj
+    }
+    else if(zj > 180)
+    {
+        zj = -(360 - zj);
+    }
+    return zj;
+}
