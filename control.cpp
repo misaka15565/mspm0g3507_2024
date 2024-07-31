@@ -590,7 +590,7 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
 }
 
 uint16_t adjust_at_A_param = 270;
-uint16_t adjust_at_B_param = 330;
+uint16_t adjust_at_B_param = 340;
 uint16_t adjust_params[4][2] = {
     {adjust_at_A_param, adjust_at_B_param},
     {adjust_at_A_param, adjust_at_B_param},

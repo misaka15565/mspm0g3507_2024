@@ -463,7 +463,7 @@ void param_adjust_menu() {
     Menu_Process((uint8 *)" -=   Setting   =- ", &prmt, table, menuNum);
 }
 
-static bool close_oled_while_run = true;
+static uint16 close_oled_while_run = 1;
 // 有捕获的lambda不能转为void(*)()函数指针，所以就这样放着吧
 static uint16 now_problem_id = now_problem;
 void main_menu_start() {
@@ -484,6 +484,7 @@ void main_menu_start() {
                  if (close_oled_while_run) {
                      oled_disable_print = 1;
                  }
+                 delay_ms(1000);
                  switch (now_problem) {
                  case problem_1:
                      go_problem1();
@@ -503,14 +504,14 @@ void main_menu_start() {
                  oled_disable_print = 0;
              },
              &now_problem_id},
-            {(uint8 *)"go problem1", go_problem1, nullptr},
-            {(uint8 *)"go problem2", go_problem2, nullptr},
-            {(uint8 *)"go problem3", go_problem3, nullptr},
-            {(uint8 *)"go problem4", go_problem4, nullptr},
-            {(uint8 *)"keep oled open", []() {
-                 close_oled_while_run = false;
+            //{(uint8 *)"go problem1", go_problem1, nullptr},
+            //{(uint8 *)"go problem2", go_problem2, nullptr},
+            //{(uint8 *)"go problem3", go_problem3, nullptr},
+            //{(uint8 *)"go problem4", go_problem4, nullptr},
+            {(uint8 *)"keep oled toggle", []() {
+                 close_oled_while_run = 1 - close_oled_while_run;
              },
-             nullptr},
+             &close_oled_while_run},
             {(uint8 *)"adj parmas", param_adjust_menu, nullptr},
         };
     // 一级菜单
