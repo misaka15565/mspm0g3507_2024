@@ -110,7 +110,7 @@ static void gw_gray_serial_read() {
 // 在定时器中断中运行
 void gw_gray_update_irq() {
     gw_gray_serial_read();
-    // 如果近11次中有6次及以上为黑色，则认为是黑色
+    // 如果近11次中有1次及以上为黑色，则认为是黑色
     // 记录近11次中，各bit有几次是黑色
     // 黑色是0
     static int8_t sensor1_last10_isblack_count[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -134,10 +134,10 @@ void gw_gray_update_irq() {
     sensor1_res_flitered = 0;
     sensor2_res_flitered = 0;
     for (int i = 0; i < 8; ++i) {
-        if (sensor1_last10_isblack_count[i] < 3) {
+        if (sensor1_last10_isblack_count[i] < 1) {
             sensor1_res_flitered |= 1 << i;
         }
-        if (sensor2_last10_isblack_count[i] < 3) {
+        if (sensor2_last10_isblack_count[i] < 1) {
             sensor2_res_flitered |= 1 << i;
         }
     }
