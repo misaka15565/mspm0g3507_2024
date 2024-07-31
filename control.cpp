@@ -19,8 +19,8 @@ uint16_t time_adjust = 500;
 #define sensor1_get(x) GET_NTH_BIT(sensor1_res, x + 1)
 
 // 对于传感器2（后面那个），8号检测在车的左后方，给转换成0号，这样和前面是统一的
-//  0-7 --> 8-1
-#define sensor2_get(x) GET_NTH_BIT(sensor2_res, 8 - x)
+//  0-7 --> 1-8
+#define sensor2_get(x) GET_NTH_BIT(sensor2_res, x + 1)
 #define S__BKPT()
 using u16 = uint16_t;
 using u8 = uint8_t;
@@ -256,7 +256,7 @@ void go_problem2() {
     // go_problem2_mpu();
     // return;
     constexpr u16 default_mid_speed = 15; // 默认直行速度
-    constexpr u16 default_left_speed = 15;
+    constexpr u16 default_left_speed = 16;
     constexpr u16 default_right_speed = 10;
     constexpr u16 offset_speed = 6;
     float scale = 0;
@@ -334,6 +334,8 @@ void go_problem2() {
     i16 last_blackline_pos2 = -1;
     char last_run_motor = 'x';
     while (true) {
+        // 不调了
+        break;
         // 更新传感器
         gw_gray_serial_read();
         // 判断
@@ -355,15 +357,15 @@ void go_problem2() {
                 BEEP_ms(5000);
                 break;
             }
-        } else if (blackline_pos2 == 12) {
+        } else if (blackline_pos2 == 8) {
             // 进入下个阶段
             set_target_speed(0, 0);
             break;
-        } else if (blackline_pos2 < 12) {
+        } else if (blackline_pos2 < 7) {
             motor_L_run_distance(1);
             last_run_motor = 'L';
         } else {
-            motor_R_run_distance(1);
+            motor_R_run_distance(7);
             last_run_motor = 'R';
         }
         if (blackline_pos2 != -1) last_blackline_pos2 = blackline_pos2;
