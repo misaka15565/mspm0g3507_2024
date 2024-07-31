@@ -47,7 +47,6 @@
 /* 读取固件版本号 */
 #define GW_GRAY_FIRMWARE 0xC1
 
-
 /**
  * @brief 从一个变量分离出所有的bit
  */
@@ -68,9 +67,13 @@
 
 /* 广播重置地址所需要发的数据 */
 #define GW_GRAY_BROADCAST_RESET "\xB8\xD0\xCE\xAA\xBF\xC6\xBC\xBC"
-volatile uint8_t sensor1_res=0;//每bit 8 7 6 5 4 3 2 1号的数据
-volatile uint8_t sensor2_res=0;
-void gw_gray_serial_read() {
+volatile uint8_t sensor1_res = 0; // 每bit 8 7 6 5 4 3 2 1号的数据
+volatile uint8_t sensor2_res = 0;
+
+volatile uint8_t sensor1_res_flitered = 0;
+volatile uint8_t sensor2_res_flitered = 0;
+
+static void gw_gray_serial_read() {
     uint8_t ret1 = 0;
     uint8_t ret2 = 0;
 
@@ -93,4 +96,64 @@ void gw_gray_serial_read() {
 
     sensor1_res = ret1;
     sensor2_res = ret2;
+}
+// sensor1是前面的
+
+// 0-7 --> 1-8
+#define sensor1_get(x) GET_NTH_BIT(sensor1_res, x + 1)
+
+// 对于传感器2（后面那个），8号检测在车的左后方，给转换成0号，这样和前面是统一的
+//  0-7 --> 1-8
+#define sensor2_get(x) GET_NTH_BIT(sensor2_res, x + 1)
+
+#define sensor_data_get(data, x) GET_NTH_BIT(data, x + 1)
+// 在定时器中断中运行
+void gw_gray_update_irq() {
+    gw_gray_serial_read();
+    // 如果近11次中有6次及以上为黑色，则认为是黑色
+    // 记录近11次中，各bit有几次是黑色
+    // 黑色是0
+    static int8_t sensor1_last10_isblack_count[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    static int8_t sensor2_last10_isblack_count[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    static uint8_t sensor1_last10_record[10] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+    static uint8_t sensor2_last10_record[10] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+    // 记录了前十次拿到的原始数据
+    static uint8_t record_index = 0;
+
+    // 更新数据
+    for (int i = 0; i < 8; ++i) {
+        if (sensor1_get(i) == 0) {
+            sensor1_last10_isblack_count[i]++;
+        }
+        if (sensor2_get(i) == 0) {
+            sensor2_last10_isblack_count[i]++;
+        }
+    }
+
+    // 拼接过滤后数据
+    sensor1_res_flitered = 0;
+    sensor2_res_flitered = 0;
+    for (int i = 0; i < 8; ++i) {
+        if (sensor1_last10_isblack_count[i] < 6) {
+            sensor1_res_flitered |= 1 << i;
+        }
+        if (sensor2_last10_isblack_count[i] < 6) {
+            sensor2_res_flitered |= 1 << i;
+        }
+    }
+
+    // 数据出队
+    for (int i = 0; i < 8; ++i) {
+        if (sensor_data_get(sensor1_last10_record[record_index], i) == 0) {
+            sensor1_last10_isblack_count[i]--;
+        }
+        if (sensor_data_get(sensor2_last10_record[record_index], i) == 0) {
+            sensor2_last10_isblack_count[i]--;
+        }
+    }
+    // 数据入队
+    sensor1_last10_record[record_index] = sensor1_res;
+    sensor2_last10_record[record_index] = sensor2_res;
+
+    record_index = (1 + record_index) % 10;
 }

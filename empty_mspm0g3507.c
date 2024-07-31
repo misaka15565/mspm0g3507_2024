@@ -113,11 +113,10 @@ int main(void) {
         mpu6050_updateYaw();
         oled_print(2, "yaw=%f", system_yaw);
 
-        oled_print(3, "sensor 1:%02X 2:%02X", (int32_t)sensor1_res, (int32_t)sensor2_res);
+        oled_print(3, "sensor 1:%02X 2:%02X", (int32_t)sensor1_res_flitered, (int32_t)sensor2_res_flitered);
         oled_print(4, "speed A=%d B=%d", motorA_getspeed(), motorB_getspeed());
 
         // 控制部分
-        gw_gray_serial_read();
         // go();
         static uint16_t oled_count = 0;
         OLED_Refresh();
@@ -128,6 +127,7 @@ int main(void) {
 void TIMER_0_INST_IRQHandler(void) {
     // DL_GPIO_togglePins(GPIO_B_PORT, GPIO_B_LED2_GREEN_PIN);
     static int count = 0;
+    gw_gray_update_irq();
     BEEP_IRQ();
     update_speed_irq();
     speed_pid_irqHandler();

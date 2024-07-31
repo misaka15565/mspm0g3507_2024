@@ -16,11 +16,11 @@ uint16_t time_adjust = 500;
 // sensor1是前面的
 
 // 0-7 --> 1-8
-#define sensor1_get(x) GET_NTH_BIT(sensor1_res, x + 1)
+#define sensor1_get(x) GET_NTH_BIT(sensor1_res_flitered, x + 1)
 
 // 对于传感器2（后面那个），8号检测在车的左后方，给转换成0号，这样和前面是统一的
 //  0-7 --> 1-8
-#define sensor2_get(x) GET_NTH_BIT(sensor2_res, x + 1)
+#define sensor2_get(x) GET_NTH_BIT(sensor2_res_flitered, x + 1)
 #define S__BKPT()
 using u16 = uint16_t;
 using u8 = uint8_t;
@@ -77,7 +77,7 @@ line_patrol_output line_patrol_core() {
     ret.stoped = false;
     constexpr i16 mid_pos = 7;
     // 传感器更新
-    gw_gray_serial_read();
+    
 
     // 尽量让黑线在两个传感器的中间位置
 
@@ -133,7 +133,7 @@ void go_problem1() {
     enable_acclimit();
     while (true) {
         // 传感器更新
-        gw_gray_serial_read();
+        
 
         // 判断
 
@@ -182,7 +182,7 @@ void go_problem2() {
     enable_acclimit();
     while (true) {
         // 传感器更新
-        gw_gray_serial_read();
+        
         // 判断
         // 传感器1检测黑线的位置
         i16 blackline_pos1 = get_sensor1_blackline_pos();
@@ -234,7 +234,7 @@ void go_problem2() {
         // 不调了
         break;
         // 更新传感器
-        gw_gray_serial_read();
+        
         // 判断
         // 保持右轮不动，左轮转动，让黑线在后传感器的12处
 
@@ -277,7 +277,7 @@ void go_problem2() {
     enable_acclimit();
     while (true) {
         // 传感器更新
-        gw_gray_serial_read();
+        
         // 判断
         // 传感器1检测黑线的位置
         i16 blackline_pos1 = get_sensor1_blackline_pos();
@@ -343,7 +343,7 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
     uint32_t start_time_A = sys_cur_tick_us;
     while (true) {
         // 传感器更新
-        gw_gray_serial_read();
+        
         // 判断
         // 传感器1检测黑线的位置
         i16 blackline_pos1 = get_sensor1_blackline_pos();
@@ -403,7 +403,7 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
     uint32_t start_time_B = sys_cur_tick_us;
     while (true) {
         // 传感器更新
-        gw_gray_serial_read();
+        
         // 判断
         // 传感器1检测黑线的位置
         i16 blackline_pos1 = get_sensor1_blackline_pos();

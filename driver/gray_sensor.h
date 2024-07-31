@@ -9,9 +9,12 @@
 #ifndef INC_GW_GRAYSCALE_SENSOR_H_
 #define INC_GW_GRAYSCALE_SENSOR_H_
 #include "stdint.h"
-void gw_gray_serial_read();
-extern volatile uint8_t sensor1_res;
-extern volatile uint8_t sensor2_res;
+//void gw_gray_serial_read();
+void gw_gray_update_irq();
+
+
+extern volatile uint8_t sensor1_res_flitered;
+extern volatile uint8_t sensor2_res_flitered;
 
 /**
  * @brief 从I2C得到的8位的数字信号的数据 读取第n位的数据
