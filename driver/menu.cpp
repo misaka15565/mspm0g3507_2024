@@ -12,7 +12,6 @@ extern "C" {
 #include "motor.h"
 #include <stdio.h>
 #include "driver/encoder.h"
-#include "gyro.h"
 }
 #define PAGE_DISP_NUM 7
 

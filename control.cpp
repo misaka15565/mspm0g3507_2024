@@ -5,7 +5,6 @@ uint16_t time_adjust = 500;
 #include "driver/gray_sensor.h"
 #include "driver/oled.h"
 #include "driver/BEEP.h"
-#include "driver/gyro.h"
 #include "stdlib.h"
 }
 #include "ti_msp_dl_config.h"
@@ -179,7 +178,6 @@ void go_problem2() {
 
     // mpu6050_prepare();
     // mpu6050_updateYaw();
-    const float origin_yaw = system_yaw;
     // A-->B
     uint32_t start_time_A = sys_cur_tick_us;
     oled_print(0, "A->B");

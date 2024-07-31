@@ -31,13 +31,9 @@
  */
 
 #include "driver/encoder.h"
-#include "driver/gyro.h"
 #include "driver/motor.h"
 #include "ti_msp_dl_config.h"
 #include <stdio.h>
-#include "driver/mpu6050/bsp_mpu6050.h"
-#include "driver/mpu6050/inv_mpu_dmp_motion_driver.h"
-#include "driver/mpu6050/inv_mpu.h"
 #include "driver/oled.h"
 #include "driver/menu.hpp"
 #include "driver/key.hpp"
@@ -50,13 +46,7 @@
 int main(void) {
     SYSCFG_DL_init();
 
-    board_init();
-    MPU6050_Init();
-    while (mpu_dmp_init()) {
-        printf("dmp error\r\n");
-        delay_ms(200);
-    }
-    printf("Initialization Data Succeed \r\n");
+    
     NVIC_ClearPendingIRQ(TIMER_0_INST_INT_IRQN);
     NVIC_ClearPendingIRQ(GPIO_MULTIPLE_GPIOA_INT_IRQN);
     NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
@@ -110,8 +100,6 @@ int main(void) {
         r = -999;
         y = -999;
         // 注意：即使status为0，也不代表读到的数据是正确的
-        mpu6050_updateYaw();
-        oled_print(2, "yaw=%f", system_yaw);
 
         oled_print(3, "sensor 1:%02X 2:%02X", (int32_t)sensor1_res_flitered, (int32_t)sensor2_res_flitered);
         oled_print(4, "speed A=%d B=%d", motorA_getspeed(), motorB_getspeed());
