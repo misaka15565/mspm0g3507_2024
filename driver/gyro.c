@@ -76,7 +76,7 @@ float mpu60550_JDX(float ny,float ty)//ny为当前偏航角，ty为目标偏航�
     float zj = ny - ty;
     if(zj < -180)
     {
-        zj = 360 + zj
+        zj = 360 + zj;
     }
     else if(zj > 180)
     {
