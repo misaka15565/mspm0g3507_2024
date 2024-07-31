@@ -4,6 +4,7 @@
 #include "key.hpp"
 #include "utils/delay.hpp"
 #include "control.hpp"
+#include "statemachine.hpp"
 extern "C" {
 #include "oled.h"
 #include "motor.h"
@@ -227,16 +228,58 @@ void pwm_test_menu() {
     Menu_Process((uint8 *)" -=   pwm test   =- ", &prmt, table, menuNum);
 }
 
+// 有捕获的lambda不能转为void(*)()函数指针，所以就这样放着吧
+static const char *problem_str[4] = {"now is problem1", "now is problem2",
+                              "now is problem3", "now is problem4"};
+static uint8 *now_problem_str = nullptr;
 void main_menu_start() {
+    switch (now_problem) {
+    case problem_1:
+        now_problem_str = (uint8 *)problem_str[0];
+        break;
+    case problem_2:
+        now_problem_str = (uint8 *)problem_str[1];
+        break;
+    case problem_3:
+        now_problem_str = (uint8 *)problem_str[2];
+        break;
+    case problem_4:
+        now_problem_str = (uint8 *)problem_str[3];
+        break;
+    default: break;
+    }
+
     MENU_TABLE MainMenu_Table[] =
         {
             {(uint8 *)"return ", nullptr, nullptr},
+            {(uint8 *)"set problem1", []() {
+                 now_problem = problem_1;
+                 now_problem_str = (uint8 *)problem_str[0];
+             },
+             nullptr},
+            {(uint8 *)"set problem2", []() {
+                 now_problem = problem_2;
+                 now_problem_str = (uint8 *)problem_str[1];
+             },
+             nullptr},
+            {(uint8 *)"set problem3", []() {
+                 now_problem = problem_3;
+                 now_problem_str = (uint8 *)problem_str[2];
+             },
+             nullptr},
+            {(uint8 *)"set problem4", []() {
+                 now_problem = problem_4;
+                 now_problem_str = (uint8 *)problem_str[3];
+             },
+             nullptr},
+            {now_problem_str, nullptr, nullptr},
             {(uint8 *)"oled flush test", []() {
                  uint32_t time_start = sys_cur_tick_us;
                  for (int i = 0; i < 100; ++i) {
                      OLED_Refresh();
                  }
-                 printf("%d\n", sys_cur_tick_us - time_start);
+                 oled_print(0, "%d\n", sys_cur_tick_us - time_start);
+                 delay_ms(1000);
              },
              nullptr},
             {(uint8 *)"adjust time adjust", adjust_time_adjust, nullptr}};

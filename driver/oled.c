@@ -1,9 +1,10 @@
 #include "oled.h"
 #include "ti_msp_dl_config.h"
-#include "mpu6050/board.h"
+#include "utils/delay.hpp"
 #include <stdarg.h>
 #include <stdio.h>
-uint8_t disable_print = 0;
+#include <string.h>
+uint8_t oled_disable_print = 0;
 #define OLED_CMD 0                                                  // 写命令
 #define OLED_DATA 1                                                 // 写数据
 #define OLED_SCL_Clr() DL_GPIO_clearPins(OLED_PORT, OLED_S_SCL_PIN) // at32_led_on(I2C_SCL)
@@ -175,7 +176,7 @@ void OLED_DisPlay_Off(void) {
 }
 
 void OLED_Refresh(void) {
-    if (disable_print) return;
+    if (oled_disable_print) return;
     uint8_t i, n;
     for (i = 0; i < 8; i++) {
         OLED_WR_Byte(0xb0 + i, OLED_CMD);
@@ -393,7 +394,7 @@ void OLED_Init(void) {
     OLED_WR_Byte(0xAF, OLED_CMD);
 }
 void oled_print(uint8_t line, char *format, ...) {
-    if (disable_print) return;
+    if (oled_disable_print) return;
     uint8_t y = line * 8;
     static char tmp[256];
     va_list args;

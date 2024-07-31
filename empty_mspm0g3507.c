@@ -45,6 +45,7 @@
 #include "utils/delay.hpp"
 #include "speed.hpp"
 #include "driver/BEEP.h"
+#include "statemachine.hpp"
 int main(void) {
     SYSCFG_DL_init();
 
@@ -74,7 +75,24 @@ int main(void) {
     int angle = 0;
     uint32_t last_time = sys_cur_tick_us;
     uint16_t dmp_try_count = 0;
-    disable_print = 0;
+    oled_disable_print = 1;
+
+    switch (now_problem) {
+    case problem_1:
+        go_problem1();
+        break;
+    case problem_2:
+        go_problem2();
+        break;
+    case problem_3:
+        go_problem3();
+        break;
+    case problem_4:
+        go_problem4();
+        break;
+    }
+    set_target_speed(0, 0);
+    oled_disable_print = 0;
     while (1) {
         uint32_t time_use = sys_cur_tick_us - last_time;
         last_time = sys_cur_tick_us;
@@ -103,7 +121,7 @@ int main(void) {
 
         // 控制部分
         gw_gray_serial_read();
-        go();
+        // go();
         static uint16_t oled_count = 0;
         OLED_Refresh();
     }

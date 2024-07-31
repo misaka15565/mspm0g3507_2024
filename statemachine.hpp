@@ -11,12 +11,12 @@ enum problem {
     problem_4
 };
 
-extern problem now_problem; // 在离开菜单后不变
+extern enum problem now_problem; // 在离开菜单后不变
 
 #ifdef __cplusplus
 }
 #endif
-
+#ifdef __cplusplus
 enum action {
     reach_blackline_end,
     reach_blackline_start,
@@ -53,7 +53,7 @@ enum state_problem3 {
     reach_C,          // 到达C，进行声光提示
     run_reverse_circle_C2B,
     wait_at_B,
-    run_diagonal_B2D,// 从B行驶到D,对角线,行驶到B，车头指向A时的偏航角加上arctan
+    run_diagonal_B2D, // 从B行驶到D,对角线,行驶到B，车头指向A时的偏航角加上arctan
     reach_D,
     run_circle_D2A,
     stop_at_A
@@ -93,7 +93,7 @@ public:
     sp4::state_problem4 get_sp4() const;
     uint16_t get_sp4_round_count() const;
     void action_performed(const action x);
-    bool need_stop()const;
+    bool need_stop() const;
 };
-
+#endif
 #endif

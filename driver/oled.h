@@ -1,7 +1,7 @@
 #ifndef OLED_H
 #define OLED_H
 #include <stdint.h>
-extern uint8_t disable_print;
+extern uint8_t oled_disable_print;
 void OLED_ClearPoint(uint8_t x, uint8_t y);
 void OLED_ColorTurn(uint8_t i);
 void OLED_DisplayTurn(uint8_t i);
