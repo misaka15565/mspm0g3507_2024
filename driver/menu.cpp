@@ -478,6 +478,31 @@ void main_menu_start() {
                  now_problem = (problem)(now_problem_id);
              },
              &now_problem_id},
+            {(uint8 *)"run cur prob", []() {
+                 PID_clear_A();
+                 PID_clear_B();
+                 if (close_oled_while_run) {
+                     oled_disable_print = 1;
+                 }
+                 switch (now_problem) {
+                 case problem_1:
+                     go_problem1();
+                     break;
+                 case problem_2:
+                     go_problem2();
+                     break;
+                 case problem_3:
+                     go_problem3();
+                     break;
+                 case problem_4:
+                     go_problem4();
+                     break;
+                 default:
+                     break;
+                 }
+                 oled_disable_print = 0;
+             },
+             &now_problem_id},
             {(uint8 *)"go problem1", go_problem1, nullptr},
             {(uint8 *)"go problem2", go_problem2, nullptr},
             {(uint8 *)"go problem3", go_problem3, nullptr},
