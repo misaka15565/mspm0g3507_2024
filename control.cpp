@@ -10,7 +10,6 @@ uint16_t time_adjust = 500;
 #include "statemachine.hpp"
 #include "utils/delay.hpp"
 #include "speed.hpp"
-#define My_abs(n) (n>0?n:(-n))
 // sensor1是前面的
 
 // 0-7 --> 1-8
@@ -98,49 +97,6 @@ void go_problem2() {
     constexpr u16 default_right_speed = 10;
     constexpr u16 offset_speed = 4;
     float scale = 0;
-    volatile float p, r, y;
-    p = -999;
-    r = -999;
-    y = -999;
-    float startyaw[50];
-    float baseyaw = 0;
-    float ty = 0;
-    float ny = 0;
-    Kp = 0.2;
-
-    while(true)
-    {
-        mpu_dmp_get_data(&p, &r, &y);
-        start_yaw[i++] = y;
-        if(i == 50) //采样50次
-        {
-            float max_index = 0;
-            float min_index = 0;
-            for (int i = 1; i < 50; i++) 
-            {
-                if (start_yaw[i] > start_yaw[max_index]) 
-                {
-                    max_index = i;
-                }
-                if (start_yaw[i] < start_yaw[min_index]) 
-                {
-                    min_index = i;
-                }
-            }
-            // 去除最大值和最小值
-            for (int i = 0; i < 50; i++) 
-            {
-                if (i != max_index && i != min_index) 
-                {
-                    baseyaw += start_yaw[i];
-                }
-            }
-            // 计算剩余数据的平均值（除去最大值和最小值后剩余48个）
-            float baseyaw = baseyaw / 48;
-            break;
-        }
-        delay_ms(5);
-    }
 
     // A-->B
     uint32_t start_time_A = sys_cur_tick_us;
@@ -296,23 +252,6 @@ void go_problem2() {
             u16 target_right_speed = default_right_speed - offset_speed * scale;
             set_target_speed(target_left_speed, target_right_speed);
         }
-    }
-    //调整姿态并走直线到D
-    if(baseyaw > 0)
-    {
-        ty = -(180 - baseyaw);
-    }
-    else 
-    {
-        ty = 180 - My_abs(baseyaw);
-    }
-    while(true)
-    {
-        mpu_dmp_get_data(&p, &r, &y);
-        ny = y;
-        u16 target_left_speed = default_left_speed + (ny - ty) * Kp;
-        u16 target_right_speed = default_right_speed - (ny - ty) * Kp;
-        set_target_speed(target_left_speed, target_right_speed);
     }
 }
 
