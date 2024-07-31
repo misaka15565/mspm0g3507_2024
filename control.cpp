@@ -248,19 +248,23 @@ void go_problem2_mpu() {
         }
     }
 }
+constexpr int outside_speed_default = 16; // 寻迹时外轮的基础速度
+constexpr int inside_speed_default = 10;
+constexpr int offset_speed_default = 6;
+// 本来是16 10 6
 
 // 将小车放在位置 A 点，小车能自动行驶到 B 点后，沿半弧线行驶到 C
 // 点，再由 C 点自动行驶到 D 点，最后沿半弧线行驶到 A 点停车，每经过一个点，
 // 声光提示一次。完成一圈用时不大于 30 秒。（
-float weight_front = 0.17;
+float weight_front = 0.2;
 float weight_mid = -0.1;
 void go_problem2() {
     // go_problem2_mpu();
     // return;
     constexpr u16 default_mid_speed = 15; // 默认直行速度
-    constexpr u16 default_left_speed = 8;
-    constexpr u16 default_right_speed = 5;
-    constexpr u16 offset_speed = 3;
+    constexpr u16 default_left_speed = outside_speed_default;
+    constexpr u16 default_right_speed = inside_speed_default;
+    constexpr u16 offset_speed = offset_speed_default;
     float scale = 0;
     // mpu6050_prepare();
     // mpu6050_updateYaw();
@@ -437,12 +441,12 @@ void go_problem2() {
 // 点，再由 B 点自动行驶到 D 点，最后沿半弧线行驶到 A 点停车。每经过一个点，
 // 声光提示一次。完成一圈用时不大于 40 秒。
 void go_problem3_inner_func(const int adj_A, const int adj_B) {
-    constexpr int outside_speed = 8; // 寻迹时外轮的基础速度
-    constexpr int inside_speed = 5;
-    constexpr int offset_speed = 3;
-    //本来是16 10 6
     constexpr int default_mid_speed = 15;
     float scale = 0;
+
+    constexpr int outside_speed = outside_speed_default;
+    constexpr int inside_speed = inside_speed_default;
+    constexpr int offset_speed = offset_speed_default;
 
     // A-->C
     // 手工将小车放在A点，车头朝向B点
@@ -585,18 +589,18 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
     }
 }
 
-constexpr int adjust_at_A_param = 285;
-constexpr int adjust_at_B_param = 300;
+uint16_t adjust_at_A_param = 270;
+uint16_t adjust_at_B_param = 330;
+uint16_t adjust_params[4][2] = {
+    {adjust_at_A_param, adjust_at_B_param},
+    {adjust_at_A_param, adjust_at_B_param},
+    {adjust_at_A_param, adjust_at_B_param},
+    {adjust_at_A_param, adjust_at_B_param},
+};
 void go_problem3() {
     go_problem3_inner_func(adjust_at_A_param, adjust_at_B_param);
 }
 void go_problem4() {
-    int adjust_params[4][2] = {
-        {adjust_at_A_param, adjust_at_B_param},
-        {adjust_at_A_param, adjust_at_B_param},
-        {adjust_at_A_param, adjust_at_B_param},
-        {adjust_at_A_param, adjust_at_B_param},
-    };
     for (int i = 0; i < 4; ++i) {
         go_problem3_inner_func(adjust_params[i][0], adjust_params[i][0]);
         delay_ms(1000);

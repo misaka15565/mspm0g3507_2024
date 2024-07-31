@@ -246,27 +246,27 @@ void adjust_uint16_param_menu_core(char *name, uint16 &ref) {
             {(uint8 *)"+1 val", []() {
                  ++adjust_param_uint_core_temp;
              },
-             nullptr},
+             &adjust_param_uint_core_temp},
             {(uint8 *)"-1 val", []() {
                  --adjust_param_uint_core_temp;
              },
-             nullptr},
+             &adjust_param_uint_core_temp},
             {(uint8 *)"+10 val", []() {
                  adjust_param_uint_core_temp += 10;
              },
-             nullptr},
+             &adjust_param_uint_core_temp},
             {(uint8 *)"-10 val", []() {
                  adjust_param_uint_core_temp -= 10;
              },
-             nullptr},
+             &adjust_param_uint_core_temp},
             {(uint8 *)"+100 val", []() {
                  adjust_param_uint_core_temp += 100;
              },
-             nullptr},
+             &adjust_param_uint_core_temp},
             {(uint8 *)"-100 val", []() {
                  adjust_param_uint_core_temp -= 100;
              },
-             nullptr},
+             &adjust_param_uint_core_temp},
             {(uint8 *)name, nullptr, &adjust_param_uint_core_temp}};
     MENU_PRMT subMenu1_Prmt;
     OLED_Clear();
@@ -280,6 +280,7 @@ static char *param_name;
 void adjust_float_param_menu_core(char *name, float &ref) {
     adjust_param_float_core_temp = ref;
     param_name = name;
+    sprintf(param_adjust_float_buf, "%s=%f", param_name, adjust_param_float_core_temp);
     MENU_TABLE subMenu1_Table[] =
         {
             {(uint8 *)"return ", nullptr, nullptr},
@@ -330,7 +331,7 @@ void pid_adjust_menu() {
     ki_mul_100 = Velcity_Ki * 100;
     MENU_TABLE table[] = {
         {(uint8 *)"return ", nullptr, nullptr},
-        {(uint8 *)"try run R", []() {
+        {(uint8 *)"try run R motor", []() {
              Set_PWM(0, 0);
              PID_clear_A();
              PID_clear_B();
@@ -340,7 +341,7 @@ void pid_adjust_menu() {
              set_target_speed(0, 0);
          },
          nullptr},
-        {(uint8 *)"try run L", []() {
+        {(uint8 *)"try run L motor", []() {
              Set_PWM(0, 0);
              PID_clear_A();
              PID_clear_B();
@@ -387,6 +388,81 @@ void pid_adjust_menu() {
     Velcity_Kp = (float)kp_mul_100 / 100.0;
     Velcity_Ki = (float)ki_mul_100 / 100.0;
 }
+
+void turn_direction_adjust_menu() {
+    // 调整硬编码转向的参数，是control.hpp里的全局变量
+
+    MENU_TABLE table[] = {
+        {(uint8 *)"return ", nullptr, nullptr},
+        {(uint8 *)"adj_at_A_par", []() {
+             adjust_uint16_param_menu_core("at_A_par", adjust_at_A_param);
+         },
+         nullptr},
+        {(uint8 *)"adj_at_B_par", []() {
+             adjust_uint16_param_menu_core("at_B_par", adjust_at_B_param);
+         },
+         nullptr},
+        {(uint8 *)"adj_params[0][0]", []() {
+             adjust_uint16_param_menu_core("params[0][0]", adjust_params[0][0]);
+         },
+         nullptr},
+        {(uint8 *)"adj_params[0][1]", []() {
+             adjust_uint16_param_menu_core("params[0][1]", adjust_params[0][1]);
+         },
+         nullptr},
+        {(uint8 *)"adj_params[1][0]", []() {
+             adjust_uint16_param_menu_core("params[1][0]", adjust_params[1][0]);
+         },
+         nullptr},
+        {(uint8 *)"adj_params[1][1]", []() {
+             adjust_uint16_param_menu_core("params[1][1]", adjust_params[1][1]);
+         },
+         nullptr},
+        {(uint8 *)"adj_params[2][0]", []() {
+             adjust_uint16_param_menu_core("params[2][0]", adjust_params[2][0]);
+         },
+         nullptr},
+        {(uint8 *)"adj_params[2][1]", []() {
+             adjust_uint16_param_menu_core("params[2][1]", adjust_params[2][1]);
+         },
+         nullptr},
+        {(uint8 *)"adj_params[3][0]", []() {
+             adjust_uint16_param_menu_core("params[3][0]", adjust_params[3][0]);
+         },
+         nullptr},
+        {(uint8 *)"adj_params[3][1]", []() {
+             adjust_uint16_param_menu_core("params[3][1]", adjust_params[3][1]);
+         },
+         nullptr}};
+
+    MENU_PRMT prmt;
+    OLED_Clear();
+    uint8 menuNum = sizeof(table) / sizeof(table[0]); // 菜单项数
+    Menu_Process((uint8 *)" -=   turn direction adjust   =- ", &prmt, table, menuNum);
+}
+
+void param_adjust_menu() {
+    MENU_TABLE table[] = {
+        {(uint8 *)"return ", nullptr, nullptr},
+        //{(uint8 *)"time adjust", adjust_time_adjust, nullptr},
+        {(uint8 *)"pwm test", pwm_test_menu, nullptr},
+        {(uint8 *)"pid adjust", pid_adjust_menu, nullptr},
+        {(uint8 *)"adj weight mid", []() {
+             adjust_float_param_menu_core("w_mid", weight_mid);
+         },
+         nullptr},
+        {(uint8 *)"adj weight front", []() {
+             adjust_float_param_menu_core("w_side", weight_front);
+         },
+         nullptr},
+        {(uint8 *)"turn distance", turn_direction_adjust_menu, nullptr},
+    };
+    MENU_PRMT prmt;
+    OLED_Clear();
+    uint8 menuNum = sizeof(table) / sizeof(table[0]); // 菜单项数
+    Menu_Process((uint8 *)" -=   Setting   =- ", &prmt, table, menuNum);
+}
+
 static bool close_oled_while_run = true;
 // 有捕获的lambda不能转为void(*)()函数指针，所以就这样放着吧
 static uint16 now_problem_id = now_problem;
@@ -394,36 +470,23 @@ void main_menu_start() {
     MENU_TABLE MainMenu_Table[] =
         {
             {(uint8 *)"return ", nullptr, nullptr},
-            {(uint8 *)"set problem1", []() {
-                 now_problem = problem_1;
-                 now_problem_id = problem_1;
+            {(uint8 *)"switch next problem", []() {
+                 now_problem_id++;
+                 if (now_problem_id > problem_4) {
+                     now_problem_id = problem_1;
+                 }
+                 now_problem = (problem)(now_problem_id);
              },
-             nullptr},
-            {(uint8 *)"set problem2", []() {
-                 now_problem = problem_2;
-                 now_problem_id = problem_2;
-             },
-             nullptr},
-            {(uint8 *)"set problem3", []() {
-                 now_problem = problem_3;
-                 now_problem_id = problem_3;
-             },
-             nullptr},
-            {(uint8 *)"set problem4", []() {
-                 now_problem = problem_4;
-                 now_problem_id = problem_4;
-             },
-             nullptr},
-            {(uint8 *)"now problem is", nullptr, &now_problem_id},
+             &now_problem_id},
+            {(uint8 *)"go problem1", go_problem1, nullptr},
+            {(uint8 *)"go problem2", go_problem2, nullptr},
+            {(uint8 *)"go problem3", go_problem3, nullptr},
+            {(uint8 *)"go problem4", go_problem4, nullptr},
             {(uint8 *)"keep oled open", []() {
                  close_oled_while_run = false;
              },
              nullptr},
-            {(uint8 *)"pid adjust", pid_adjust_menu, nullptr},
-            {(uint8 *)"adj weight mid", []() {
-                 adjust_float_param_menu_core("w_mid", weight_mid);
-             },
-             nullptr},
+            {(uint8 *)"adj parmas", param_adjust_menu, nullptr},
         };
     // 一级菜单
     MENU_PRMT MainMenu_Prmt;
