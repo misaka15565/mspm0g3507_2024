@@ -252,6 +252,8 @@ void go_problem2_mpu() {
 // 将小车放在位置 A 点，小车能自动行驶到 B 点后，沿半弧线行驶到 C
 // 点，再由 C 点自动行驶到 D 点，最后沿半弧线行驶到 A 点停车，每经过一个点，
 // 声光提示一次。完成一圈用时不大于 30 秒。（
+float weight_front = 0.17;
+float weight_mid = -0.1;
 void go_problem2() {
     // go_problem2_mpu();
     // return;
@@ -312,17 +314,13 @@ void go_problem2() {
             // 检测到黑线
             // 根据黑线位置调整车的状态
             // 黑线在中间则位置是7
-            scale = (blackline_pos1 - 7) * 0.17;
+            scale = (blackline_pos1 - 7) * weight_front;
             // 希望后传感器也是黑线在中间
-            /*
-            if (blackline_pos2 < 7) {
-                scale += -0.25;
-            } else if (blackline_pos2 > 7) {
-                scale += 0.25;
-            } else {
-                scale += 0;
+            if (blackline_pos2 != -1) {
+                scale += (blackline_pos2 - 7) * weight_mid;
             }
-*/
+            scale *= 0.5;
+
             u16 target_left_speed = default_left_speed + offset_speed * scale;
             u16 target_right_speed = default_right_speed - offset_speed * scale;
             set_target_speed(target_left_speed, target_right_speed);
@@ -422,16 +420,12 @@ void go_problem2() {
             // 检测到黑线
             // 根据黑线位置调整车的状态
             // 黑线在中间则位置是7
-            scale = (blackline_pos1 - 7) * 0.2;
+            scale = (blackline_pos1 - 7) * weight_front;
             // 希望后传感器也是黑线在中间
-            /*
-            if (blackline_pos2 < 7) {
-                scale += -0.25;
-            } else if (blackline_pos2 > 7) {
-                scale += 0.25;
-            } else {
-                scale += 0;
-            }*/
+            if (blackline_pos2 != -1) {
+                scale += (blackline_pos2 - 7) * weight_mid;
+            }
+            scale *= 0.5;
             u16 target_left_speed = default_left_speed + offset_speed * scale;
             u16 target_right_speed = default_right_speed - offset_speed * scale;
             set_target_speed(target_left_speed, target_right_speed);
@@ -439,10 +433,10 @@ void go_problem2() {
     }
 }
 void go_problem3() {
-    mpu6050_prepare();
+    
 }
 void go_problem4() {
-    mpu6050_prepare();
+    
 }
 
 void go() {

@@ -10,6 +10,8 @@ void go_problem1();
 void go_problem2();
 void go_problem3();
 void go_problem4();
+extern float weight_front;
+extern float weight_mid;
 #ifdef __cplusplus
 }
 #endif

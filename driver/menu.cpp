@@ -11,7 +11,7 @@ extern "C" {
 #include <stdio.h>
 #include "gyro.h"
 }
-#define PAGE_DISP_NUM 6
+#define PAGE_DISP_NUM 7
 
 using uint16 = uint16_t;
 using uint8 = uint8_t;
@@ -116,7 +116,7 @@ void adjustParam(Site_t site, uint16 *param, uint8 max_param_bit) {
  * EntryParameter : menuName - 菜单名称，prmt - 菜单参数，table - 菜单表项, num - 菜单项数
  * ReturnValue    : None
  ******************************************************************************/
-void Menu_Process(uint8 *menuName, MENU_PRMT *prmt, const MENU_TABLE *table, uint8 num) {
+void Menu_Process(uint8 *menuName, MENU_PRMT *prmt, MENU_TABLE *table, uint8 num) {
     KEY_e key;
     Site_t site;
 
@@ -233,6 +233,95 @@ void pwm_test_menu() {
 static uint16 kp_mul_100 = 0;
 static uint16 ki_mul_100 = 0;
 
+static uint16 adjust_param_uint_core_temp;
+// 通用uint16调参核心
+void adjust_uint16_param_menu_core(char *name, uint16 &ref) {
+    adjust_param_uint_core_temp = ref;
+    MENU_TABLE subMenu1_Table[] =
+        {
+            {(uint8 *)"return ", nullptr, nullptr},
+            {(uint8 *)"+1 val", []() {
+                 ++adjust_param_uint_core_temp;
+             },
+             nullptr},
+            {(uint8 *)"-1 val", []() {
+                 --adjust_param_uint_core_temp;
+             },
+             nullptr},
+            {(uint8 *)"+10 val", []() {
+                 adjust_param_uint_core_temp += 10;
+             },
+             nullptr},
+            {(uint8 *)"-10 val", []() {
+                 adjust_param_uint_core_temp -= 10;
+             },
+             nullptr},
+            {(uint8 *)"+100 val", []() {
+                 adjust_param_uint_core_temp += 100;
+             },
+             nullptr},
+            {(uint8 *)"-100 val", []() {
+                 adjust_param_uint_core_temp -= 100;
+             },
+             nullptr},
+            {(uint8 *)name, nullptr, &adjust_param_uint_core_temp}};
+    MENU_PRMT subMenu1_Prmt;
+    OLED_Clear();
+    uint8 menuNum = sizeof(subMenu1_Table) / sizeof(subMenu1_Table[0]); // 菜单项数
+    Menu_Process((uint8 *)name, &subMenu1_Prmt, subMenu1_Table, menuNum);
+    ref = adjust_param_uint_core_temp;
+}
+static char param_adjust_float_buf[64];
+static float adjust_param_float_core_temp;
+static char *param_name;
+void adjust_float_param_menu_core(char *name, float &ref) {
+    adjust_param_float_core_temp = ref;
+    param_name = name;
+    MENU_TABLE subMenu1_Table[] =
+        {
+            {(uint8 *)"return ", nullptr, nullptr},
+            {(uint8 *)"+0.01 val", []() {
+                 adjust_param_float_core_temp += 0.01;
+                 sprintf(param_adjust_float_buf, "%s=%f", param_name, adjust_param_float_core_temp);
+             },
+             nullptr},
+            {(uint8 *)"-0.01 val", []() {
+                 adjust_param_float_core_temp -= 0.01;
+                 sprintf(param_adjust_float_buf, "%s=%f", param_name, adjust_param_float_core_temp);
+             },
+             nullptr},
+            {(uint8 *)"+0.1 val", []() {
+                 adjust_param_float_core_temp += 0.1;
+                 sprintf(param_adjust_float_buf, "%s=%f", param_name, adjust_param_float_core_temp);
+             },
+             nullptr},
+            {(uint8 *)"-0.1 val", []() {
+                 adjust_param_float_core_temp -= 0.1;
+                 sprintf(param_adjust_float_buf, "%s=%f", param_name, adjust_param_float_core_temp);
+             },
+             nullptr},
+            {(uint8 *)"+1 val", []() {
+                 adjust_param_float_core_temp += 1;
+                 sprintf(param_adjust_float_buf, "%s=%f", param_name, adjust_param_float_core_temp);
+             },
+             nullptr},
+            {(uint8 *)"-1 val", []() {
+                 adjust_param_float_core_temp -= 1;
+                 sprintf(param_adjust_float_buf, "%s=%f", param_name, adjust_param_float_core_temp);
+             },
+             nullptr},
+            {(uint8 *)"*-1", []() {
+                 adjust_param_float_core_temp *= -1;
+                 sprintf(param_adjust_float_buf, "%s=%f", param_name, adjust_param_float_core_temp);
+             },
+             nullptr}};
+    MENU_PRMT subMenu1_Prmt;
+    OLED_Clear();
+    uint8 menuNum = sizeof(subMenu1_Table) / sizeof(subMenu1_Table[0]); // 菜单项数
+    Menu_Process((uint8 *)param_adjust_float_buf, &subMenu1_Prmt, subMenu1_Table, menuNum);
+    ref = adjust_param_float_core_temp;
+}
+
 void pid_adjust_menu() {
     kp_mul_100 = Velcity_Kp * 100;
     ki_mul_100 = Velcity_Ki * 100;
@@ -303,7 +392,12 @@ void main_menu_start() {
                  printf("time use %d", end_time - start_time);
                  delay_ms(3000);
              },
-             nullptr}};
+             nullptr},
+            {(uint8 *)"adj weight mid", []() {
+                 adjust_float_param_menu_core("w_mid", weight_mid);
+             },
+             nullptr},
+        };
     // 一级菜单
     MENU_PRMT MainMenu_Prmt;
     OLED_Clear();
