@@ -62,7 +62,7 @@ void go_problem1() {
     constexpr u16 speed_default = 15;
     // 记录当前时间
     uint32_t start_time = sys_cur_tick_us;
-
+    enable_acclimit();
     while (true) {
         // 传感器更新
         gw_gray_serial_read();
@@ -102,6 +102,7 @@ void go_problem2() {
     uint32_t start_time_A = sys_cur_tick_us;
     oled_print(0, "A->B");
     OLED_Refresh();
+    enable_acclimit();
     while (true) {
         // 传感器更新
         gw_gray_serial_read();
@@ -126,6 +127,7 @@ void go_problem2() {
     // B-->C，寻迹
     oled_print(0, "B->C");
     OLED_Refresh();
+    disable_acclimit();
     while (true) {
         float scale = 0;
         // 传感器更新
@@ -186,11 +188,12 @@ void go_problem2() {
     }
     PID_clear_A();
     PID_clear_B();
-    //delay_ms(1000);
-    // C-->D
+    // delay_ms(1000);
+    //  C-->D
     uint32_t start_time_C = sys_cur_tick_us;
     oled_print(0, "C->D");
     OLED_Refresh();
+    enable_acclimit();
     while (true) {
         // 传感器更新
         gw_gray_serial_read();
@@ -215,6 +218,7 @@ void go_problem2() {
     // D-->A，寻迹
     oled_print(0, "D->A");
     OLED_Refresh();
+    disable_acclimit();
     while (true) {
         float scale = 0;
         // 传感器更新

@@ -9,6 +9,8 @@ extern int res_A, res_B;
 
 void set_target_speed(int, int);
 void speed_pid_irqHandler();
+void enable_acclimit();
+void disable_acclimit();
 
 #ifdef __cplusplus
 }

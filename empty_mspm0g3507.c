@@ -72,13 +72,13 @@ int main(void) {
     DL_TimerG_startCounter(PWM_MOTOR_INST);
     main_menu_start();
     OLED_Clear();
+    OLED_Refresh();
     int angle = 0;
     uint32_t last_time = sys_cur_tick_us;
     uint16_t dmp_try_count = 0;
-    oled_disable_print = 1;
     float startyaw[50];
     float baseyaw = 0;
-
+    delay_ms(2000); // 等一会，让人离开
     switch (now_problem) {
     case problem_empty:
         break;

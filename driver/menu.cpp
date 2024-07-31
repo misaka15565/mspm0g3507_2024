@@ -260,7 +260,7 @@ void pid_adjust_menu() {
     Velcity_Kp = (float)kp_mul_100 / 100.0;
     Velcity_Ki = (float)ki_mul_100 / 100.0;
 }
-
+static bool close_oled_while_run = true;
 // 有捕获的lambda不能转为void(*)()函数指针，所以就这样放着吧
 static uint16 now_problem_id = now_problem;
 void main_menu_start() {
@@ -288,13 +288,8 @@ void main_menu_start() {
              },
              nullptr},
             {(uint8 *)"now problem is", nullptr, &now_problem_id},
-            {(uint8 *)"oled flush test", []() {
-                 uint32_t time_start = sys_cur_tick_us;
-                 for (int i = 0; i < 100; ++i) {
-                     OLED_Refresh();
-                 }
-                 oled_print(0, "%d\n", sys_cur_tick_us - time_start);
-                 delay_ms(1000);
+            {(uint8 *)"keep oled open", []() {
+                 close_oled_while_run = false;
              },
              nullptr},
             {(uint8 *)"pid adjust", pid_adjust_menu, nullptr}};
@@ -303,4 +298,8 @@ void main_menu_start() {
     OLED_Clear();
     uint8 menuNum = sizeof(MainMenu_Table) / sizeof(MainMenu_Table[0]); // 菜单项数
     Menu_Process((uint8 *)" -=   Setting   =- ", &MainMenu_Prmt, MainMenu_Table, menuNum);
+
+    if (close_oled_while_run) {
+        oled_disable_print = 1;
+    }
 }
