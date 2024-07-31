@@ -5,6 +5,7 @@ extern "C" {
 #endif
 #include "stdint.h"
 enum problem {
+    problem_empty,
     problem_1,
     problem_2,
     problem_3,

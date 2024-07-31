@@ -75,9 +75,11 @@ int main(void) {
     int angle = 0;
     uint32_t last_time = sys_cur_tick_us;
     uint16_t dmp_try_count = 0;
-    oled_disable_print = 1;
+    oled_disable_print = 0;
 
     switch (now_problem) {
+    case problem_empty:
+        break;
     case problem_1:
         go_problem1();
         break;
@@ -93,18 +95,19 @@ int main(void) {
     }
     set_target_speed(0, 0);
     oled_disable_print = 0;
+    // 显示一些信息
     while (1) {
         uint32_t time_use = sys_cur_tick_us - last_time;
         last_time = sys_cur_tick_us;
         oled_print(7, "time=%d", time_use);
         oled_print(5, "pwm %d %d", res_A, res_B);
-        volatile float p, r, y;
+        float p, r, y;
         p = -999;
         r = -999;
         y = -999;
         // 注意：即使status为0，也不代表读到的数据是正确的
-        /*
-         uint8_t status = mpu_dmp_get_data(&p, &r, &y);
+
+        uint8_t status = mpu_dmp_get_data(&p, &r, &y);
         ++dmp_try_count;
         oled_print(2, "dmp try %d", dmp_try_count);
         if (status == 0) {
@@ -112,7 +115,7 @@ int main(void) {
             oled_print(0, "pitch=%.2f roll=%.2f", p, r);
             oled_print(1, "yaw=%.2f wait=%d", y, i2c_waitcount);
             dmp_try_count = 0;
-        }*/
+        }
         if (dmp_try_count > 100) {
             // 陀螺仪挂了，死啦
         }
