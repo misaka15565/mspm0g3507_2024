@@ -2,6 +2,7 @@
 #include "encoder.h"
 #include "math.h"
 #include "ti_msp_dl_config.h"
+#include <stdlib.h>
 
 float Velcity_Kp = 1.0, Velcity_Ki = 0.5, Velcity_Kd; // 相关速度PID参数
 /***************************************************************************
@@ -14,24 +15,24 @@ static volatile int distanceB_buffer[10] = {};
 static volatile int distanceA_buffer_index = 0;
 static volatile int distanceB_buffer_index = 0;
 
-volatile int speed_B = 0;
-volatile int speed_A = 0;
+static volatile int speed_B = 0;
+static volatile int speed_A = 0;
 // 每ms获取一次累计脉冲数，以本次获取的值减去上10ms的值，得到速度
 void update_speed_irq() {
     int last_10ms_distance_A = distanceA_buffer[distanceA_buffer_index];
     int last_10ms_distance_B = distanceB_buffer[distanceB_buffer_index];
     distanceA_buffer[distanceA_buffer_index] = encoderA_get();
     distanceB_buffer[distanceB_buffer_index] = encoderB_get();
-    distanceA_buffer_index = (distanceA_buffer_index + 1) % 10;
-    distanceB_buffer_index = (distanceB_buffer_index + 1) % 10;
     speed_A = distanceA_buffer[distanceA_buffer_index] - last_10ms_distance_A;
     speed_B = distanceB_buffer[distanceB_buffer_index] - last_10ms_distance_B;
+    distanceA_buffer_index = (distanceA_buffer_index + 1) % 10;
+    distanceB_buffer_index = (distanceB_buffer_index + 1) % 10;
 }
 int motorB_getspeed() {
-    return -speed_B;
+    return abs(speed_B);
 }
 int motorA_getspeed() {
-    return speed_A;
+    return abs(speed_A);
 }
 
 int Velocity_A(int TargetVelocity, int CurrentVelocity) {

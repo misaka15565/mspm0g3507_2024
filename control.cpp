@@ -101,6 +101,7 @@ void go_problem2() {
     // A-->B
     uint32_t start_time_A = sys_cur_tick_us;
     oled_print(0, "A->B");
+    OLED_Refresh();
     while (true) {
         // 传感器更新
         gw_gray_serial_read();
@@ -124,6 +125,7 @@ void go_problem2() {
     }
     // B-->C，寻迹
     oled_print(0, "B->C");
+    OLED_Refresh();
     while (true) {
         float scale = 0;
         // 传感器更新
@@ -167,6 +169,7 @@ void go_problem2() {
     }
     // 调整角度，使车头指向D
     oled_print(0, "adjust direction C->D");
+    OLED_Refresh();
     while (true) {
         // 更新传感器
         gw_gray_serial_read();
@@ -190,6 +193,7 @@ void go_problem2() {
     // C-->D
     uint32_t start_time_C = sys_cur_tick_us;
     oled_print(0, "C->D");
+    OLED_Refresh();
     while (true) {
         // 传感器更新
         gw_gray_serial_read();
@@ -213,6 +217,7 @@ void go_problem2() {
     }
     // D-->A，寻迹
     oled_print(0, "D->A");
+    OLED_Refresh();
     while (true) {
         float scale = 0;
         // 传感器更新
