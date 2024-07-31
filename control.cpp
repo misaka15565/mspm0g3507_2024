@@ -5,6 +5,7 @@ uint16_t time_adjust = 500;
 #include "driver/gray_sensor.h"
 #include "driver/oled.h"
 #include "driver/BEEP.h"
+#include "driver/gyro.h"
 }
 #include "ti_msp_dl_config.h"
 #include "statemachine.hpp"
@@ -97,7 +98,9 @@ void go_problem2() {
     constexpr u16 default_right_speed = 10;
     constexpr u16 offset_speed = 6;
     float scale = 0;
-
+    mpu6050_prepare();
+    mpu6050_updateYaw();
+    const float origin_yaw = system_yaw;
     // A-->B
     uint32_t start_time_A = sys_cur_tick_us;
     oled_print(0, "A->B");
@@ -255,8 +258,10 @@ void go_problem2() {
     }
 }
 void go_problem3() {
+    mpu6050_prepare();
 }
 void go_problem4() {
+    mpu6050_prepare();
 }
 
 void go() {

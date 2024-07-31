@@ -48,16 +48,16 @@ void mpu6050_prepare() {
     p = -999;
     r = -999;
     y = -999;
-    float start_y[10];
+    float start_y[100];
     while (true) {
         int maxindex = 0;
         int minindex = 0;
         uint8_t status;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             status = mpu_dmp_get_data(&p, &r, &y);
             start_y[i] = y;
         }
-        for (int j = 1; j < 10; j++) {
+        for (int j = 1; j < 100; j++) {
             if (start_y[minindex] > start_y[j]) {
                 minindex = j;
             }
@@ -65,7 +65,7 @@ void mpu6050_prepare() {
                 maxindex = j;
             }
         }
-        if (start_y[maxindex] - start_y[minindex] < 1) {
+        if (start_y[maxindex] - start_y[minindex] < 0.1) {
             break;
         }
     }
