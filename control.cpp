@@ -69,15 +69,16 @@ struct line_patrol_output {
     bool stoped;
 };
 
+static constexpr uint32_t time_1s_us = 1000000;
+
 // 巡线核心
 // 输出量：scale
-line_patrol_output line_patrol_core() {
+line_patrol_output line_patrol_core(uint32_t starttime) {
     line_patrol_output ret;
     ret.scale = 0;
     ret.stoped = false;
     constexpr i16 mid_pos = 7;
     // 传感器更新
-    
 
     // 尽量让黑线在两个传感器的中间位置
 
@@ -86,9 +87,14 @@ line_patrol_output line_patrol_core() {
 
     if (blackline_pos1 == -1) {
         // 未检测到黑线
-        set_target_speed(0, 0);
-        ret.stoped = true;
-        return ret;
+        if (starttime + time_1s_us < sys_cur_tick_us) {
+            set_target_speed(0, 0);
+            ret.stoped = true;
+            return ret;
+        } else {
+            ret.scale = 0;
+            return ret;
+        }
     }
     if (blackline_pos2 == -1) {
         // 车刚进入，后面还没检测到黑线
@@ -133,7 +139,6 @@ void go_problem1() {
     enable_acclimit();
     while (true) {
         // 传感器更新
-        
 
         // 判断
 
@@ -182,7 +187,7 @@ void go_problem2() {
     enable_acclimit();
     while (true) {
         // 传感器更新
-        
+
         // 判断
         // 传感器1检测黑线的位置
         i16 blackline_pos1 = get_sensor1_blackline_pos();
@@ -205,8 +210,9 @@ void go_problem2() {
     oled_print(0, "B->C");
     OLED_Refresh();
     disable_acclimit();
+    uint32_t start_time_B = sys_cur_tick_us;
     while (true) {
-        auto ret = line_patrol_core();
+        auto ret = line_patrol_core(start_time_B);
         if (ret.stoped) {
             // 未检测到黑线
             // 可能已经到达了C点
@@ -234,7 +240,7 @@ void go_problem2() {
         // 不调了
         break;
         // 更新传感器
-        
+
         // 判断
         // 保持右轮不动，左轮转动，让黑线在后传感器的12处
 
@@ -277,7 +283,7 @@ void go_problem2() {
     enable_acclimit();
     while (true) {
         // 传感器更新
-        
+
         // 判断
         // 传感器1检测黑线的位置
         i16 blackline_pos1 = get_sensor1_blackline_pos();
@@ -300,8 +306,9 @@ void go_problem2() {
     oled_print(0, "D->A");
     OLED_Refresh();
     disable_acclimit();
+    uint32_t start_time_D = sys_cur_tick_us;
     while (true) {
-        auto ret = line_patrol_core();
+        auto ret = line_patrol_core(start_time_D);
         if (ret.stoped) {
             // 未检测到黑线
             // 可能已经到达了A点
@@ -337,13 +344,13 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
     PID_clear_A();
     PID_clear_B();
     motor_L_run_distance_at_speed(adj_A, 5);
-    delay_ms(1000);
+    delay_ms(500);
     set_target_speed(0, 0);
     enable_acclimit();
     uint32_t start_time_A = sys_cur_tick_us;
     while (true) {
         // 传感器更新
-        
+
         // 判断
         // 传感器1检测黑线的位置
         i16 blackline_pos1 = get_sensor1_blackline_pos();
@@ -365,10 +372,11 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
     // C-->B
     // 寻迹
     disable_acclimit();
+    uint32_t start_time_C = sys_cur_tick_us;
     while (true) {
         constexpr int default_left_speed = inside_speed;
         constexpr int default_right_speed = outside_speed;
-        auto ret = line_patrol_core();
+        auto ret = line_patrol_core(start_time_C);
         if (ret.stoped) {
             // 未检测到黑线
             // 可能已经到达了A点
@@ -384,14 +392,14 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
             set_target_speed(target_left_speed, target_right_speed);
         }
     }
-    // 先微调
-    // 右电机运动
-    motor_R_run_distance(distance_adjust_after_leave_blackline);
     // 在B点调整方向，使得车头指向D
     delay_ms(1000);
     Set_PWM(0, 0);
     PID_clear_A();
     PID_clear_B();
+    // 先微调
+    // 右电机运动
+    motor_R_run_distance(distance_adjust_after_leave_blackline);
     motor_R_run_distance_at_speed(adj_B, 5);
     PID_clear_A();
     PID_clear_B();
@@ -403,7 +411,7 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
     uint32_t start_time_B = sys_cur_tick_us;
     while (true) {
         // 传感器更新
-        
+
         // 判断
         // 传感器1检测黑线的位置
         i16 blackline_pos1 = get_sensor1_blackline_pos();
@@ -425,10 +433,11 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
     // D-->A
     // 寻迹
     disable_acclimit();
+    uint32_t start_time_D = sys_cur_tick_us;
     while (true) {
         constexpr int default_left_speed = outside_speed;
         constexpr int default_right_speed = inside_speed;
-        auto ret = line_patrol_core();
+        auto ret = line_patrol_core(start_time_D);
         if (ret.stoped) {
             // 未检测到黑线
             // 可能已经到达了A点
@@ -444,10 +453,14 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
             set_target_speed(target_left_speed, target_right_speed);
         }
     }
+    // 运动到A后，微调方向
+    // 左电机运动
+    motor_L_run_distance(distance_adjust_after_leave_blackline);
+    delay_ms(500);
 }
 
 uint16_t adjust_at_A_param = 270;
-uint16_t adjust_at_B_param = 340;
+uint16_t adjust_at_B_param = 310;
 uint16_t adjust_params[4][2] = {
     {adjust_at_A_param, adjust_at_B_param},
     {adjust_at_A_param, adjust_at_B_param},
@@ -460,10 +473,6 @@ void go_problem3() {
 void go_problem4() {
     for (int i = 0; i < 4; ++i) {
         go_problem3_inner_func(adjust_params[i][0], adjust_params[i][0]);
-        // 运动到A后，微调方向
-        // 左电机运动
-        motor_L_run_distance(distance_adjust_after_leave_blackline);
-        delay_ms(1000);
     }
 }
 
