@@ -1,6 +1,8 @@
 #include "ti_msp_dl_config.h"
 #include "./mpu6050/bsp_mpu6050.h"
+#include "mpu6050/inv_mpu_dmp_motion_driver.h"
 #include "driver/menu.hpp"
+#include "driver/mpu6050/inv_mpu.h"
 #include "gyro.h"
 int16_t sum(int16_t *data) {
     int16_t res = 0;
@@ -47,29 +49,23 @@ void mpu6050_prepare() {
     r = -999;
     y = -999;
     float start_y[10];
-    while(true)
-    {
+    while (true) {
         int maxindex = 0;
         int minindex = 0;
         uint8_t status;
-        for(int i = 0;i < 10;i++)
-        {
+        for (int i = 0; i < 10; i++) {
             status = mpu_dmp_get_data(&p, &r, &y);
             start_y[i] = y;
         }
-        for(int j = 1;j < 10;j++)
-        {
-            if(start_y[minindex] > start_y[j])
-            {
-                minindex = j; 
+        for (int j = 1; j < 10; j++) {
+            if (start_y[minindex] > start_y[j]) {
+                minindex = j;
             }
-            if(start_y[maxindex] < start_y[j])
-            {
-                maxindex = j; 
+            if (start_y[maxindex] < start_y[j]) {
+                maxindex = j;
             }
         }
-        if(start_y[maxindex] - start_y[minindex] < 1)
-        {
+        if (start_y[maxindex] - start_y[minindex] < 1) {
             break;
         }
     }

@@ -257,8 +257,8 @@ void pid_adjust_menu() {
     OLED_Clear();
     uint8 menuNum = sizeof(table) / sizeof(table[0]); // 菜单项数
     Menu_Process((uint8 *)" -=   pid adjust   =- ", &prmt, table, menuNum);
-    Velcity_Kp= (float)kp_mul_100 / 100.0;
-    Velcity_Ki= (float)ki_mul_100 / 100.0;
+    Velcity_Kp = (float)kp_mul_100 / 100.0;
+    Velcity_Ki = (float)ki_mul_100 / 100.0;
 }
 
 // 有捕获的lambda不能转为void(*)()函数指针，所以就这样放着吧
@@ -297,7 +297,7 @@ void main_menu_start() {
                  delay_ms(1000);
              },
              nullptr},
-            {(uint8 *)"adjust time adjust", adjust_time_adjust, nullptr}};
+            {(uint8 *)"pid adjust", pid_adjust_menu, nullptr}};
     // 一级菜单
     MENU_PRMT MainMenu_Prmt;
     OLED_Clear();
