@@ -15,6 +15,7 @@ int range_protect(int x, int low, int high) {
 int tarsL;
 int tarsR;
 void set_target_speed(int l, int r) {
+    if (l == 0 && r == 0) Set_PWM(0, 0); // 立刻停车
     tarsL = l;
     tarsR = r;
     oled_print(2, "tarsp %d %d", l, r);

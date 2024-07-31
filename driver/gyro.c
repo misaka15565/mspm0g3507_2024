@@ -44,6 +44,7 @@ void gyroinit() {
 }
 
 void mpu6050_prepare() {
+    return;
     float p, r, y;
     p = -999;
     r = -999;
@@ -101,6 +102,7 @@ float system_yaw = 0;
 
 // 893us
 void mpu6050_updateYaw() {
+    return;
     static float yaw_buffer[3] = {};
     float p, r, y;
     p = -999;

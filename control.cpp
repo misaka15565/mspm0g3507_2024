@@ -15,10 +15,6 @@ uint16_t time_adjust = 500;
 #include <cmath>
 // sensor1是前面的
 
-
-
-
-
 // 0-7 --> 1-8
 #define sensor1_get(x) GET_NTH_BIT(sensor1_res, x + 1)
 
@@ -264,8 +260,8 @@ void go_problem2() {
     constexpr u16 default_right_speed = 10;
     constexpr u16 offset_speed = 6;
     float scale = 0;
-    mpu6050_prepare();
-    mpu6050_updateYaw();
+    // mpu6050_prepare();
+    // mpu6050_updateYaw();
     const float origin_yaw = system_yaw;
     // A-->B
     uint32_t start_time_A = sys_cur_tick_us;
@@ -316,7 +312,7 @@ void go_problem2() {
             // 检测到黑线
             // 根据黑线位置调整车的状态
             // 黑线在中间则位置是7
-            scale = (blackline_pos1 - 7) * 0.2;
+            scale = (blackline_pos1 - 7) * 0.17;
             // 希望后传感器也是黑线在中间
             /*
             if (blackline_pos2 < 7) {
@@ -335,6 +331,8 @@ void go_problem2() {
     // 调整角度，使车头指向D
     oled_print(0, "adjust direction C->D");
     OLED_Refresh();
+    i16 last_blackline_pos2 = -1;
+    char last_run_motor = 'x';
     while (true) {
         // 更新传感器
         gw_gray_serial_read();
@@ -344,16 +342,31 @@ void go_problem2() {
         i16 blackline_pos2 = get_sensor2_blackline_pos();
         if (blackline_pos2 == -1) {
             // 后面未检测到黑线
-            // 寄啦
+            // 得稍微动一下
             set_target_speed(0, 0);
-            break;
-        } else if (blackline_pos2 >= 12) {
+            if (last_run_motor == 'L') {
+                motor_R_run_distance(1);
+            } else if (last_run_motor == 'R') {
+                motor_L_run_distance(1);
+            } else {
+                motor_L_run_distance(1);
+            }
+            if (last_blackline_pos2 == 14 || last_blackline_pos2 == 0) {
+                BEEP_ms(5000);
+                break;
+            }
+        } else if (blackline_pos2 == 12) {
             // 进入下个阶段
             set_target_speed(0, 0);
             break;
+        } else if (blackline_pos2 < 12) {
+            motor_L_run_distance(1);
+            last_run_motor = 'L';
         } else {
-            set_target_speed(1, 0);
+            motor_R_run_distance(1);
+            last_run_motor = 'R';
         }
+        if (blackline_pos2 != -1) last_blackline_pos2 = blackline_pos2;
     }
     PID_clear_A();
     PID_clear_B();
