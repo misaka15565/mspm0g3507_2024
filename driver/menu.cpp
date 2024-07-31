@@ -1,4 +1,6 @@
 #include "menu.hpp"
+
+#include "speed.hpp"
 #include "ti_msp_dl_config.h"
 #include <cstdint>
 #include "key.hpp"
@@ -9,6 +11,7 @@ extern "C" {
 #include "oled.h"
 #include "motor.h"
 #include <stdio.h>
+#include "driver/encoder.h"
 #include "gyro.h"
 }
 #define PAGE_DISP_NUM 7
@@ -327,6 +330,40 @@ void pid_adjust_menu() {
     ki_mul_100 = Velcity_Ki * 100;
     MENU_TABLE table[] = {
         {(uint8 *)"return ", nullptr, nullptr},
+        {(uint8 *)"try run R", []() {
+             Set_PWM(0, 0);
+             PID_clear_A();
+             PID_clear_B();
+             motor_R_run_distance_at_speed(290, 5);
+             set_target_speed(10, 10);
+             delay_ms(5000);
+             set_target_speed(0, 0);
+         },
+         nullptr},
+        {(uint8 *)"try run L", []() {
+             Set_PWM(0, 0);
+             PID_clear_A();
+             PID_clear_B();
+             motor_L_run_distance_at_speed(290, 5);
+             set_target_speed(10, 10);
+             delay_ms(5000);
+             set_target_speed(0, 0);
+         },
+         nullptr},
+        {(uint8 *)"read abs encoder", []() {
+             int origin_left = encoderA_get();
+             int origin_right = encoderB_get();
+             OLED_Clear();
+             // 不退出的，你要reset
+             while (true) {
+                 int left = encoderA_get();
+                 int right = encoderB_get();
+                 oled_print(0, "left=%d", left - origin_left);
+                 oled_print(1, "right=%d", right - origin_right);
+                 OLED_Refresh();
+             }
+         },
+         nullptr},
         {(uint8 *)"kp*100 ++", []() {
              ++kp_mul_100;
          },
@@ -383,16 +420,6 @@ void main_menu_start() {
              },
              nullptr},
             {(uint8 *)"pid adjust", pid_adjust_menu, nullptr},
-            {(uint8 *)"float test", []() {
-                 uint32_t start_time = sys_cur_tick_us;
-                 for (int i = 0; i < 10000; ++i) {
-                     mpu6050_updateYaw();
-                 }
-                 uint32_t end_time = sys_cur_tick_us;
-                 printf("time use %d", end_time - start_time);
-                 delay_ms(3000);
-             },
-             nullptr},
             {(uint8 *)"adj weight mid", []() {
                  adjust_float_param_menu_core("w_mid", weight_mid);
              },

@@ -258,9 +258,9 @@ void go_problem2() {
     // go_problem2_mpu();
     // return;
     constexpr u16 default_mid_speed = 15; // 默认直行速度
-    constexpr u16 default_left_speed = 16;
-    constexpr u16 default_right_speed = 10;
-    constexpr u16 offset_speed = 6;
+    constexpr u16 default_left_speed = 8;
+    constexpr u16 default_right_speed = 5;
+    constexpr u16 offset_speed = 3;
     float scale = 0;
     // mpu6050_prepare();
     // mpu6050_updateYaw();
@@ -432,11 +432,175 @@ void go_problem2() {
         }
     }
 }
+
+// 将小车放在位置 A 点，小车能自动行驶到 C 点后，沿半弧线行驶到 B
+// 点，再由 B 点自动行驶到 D 点，最后沿半弧线行驶到 A 点停车。每经过一个点，
+// 声光提示一次。完成一圈用时不大于 40 秒。
+void go_problem3_inner_func(const int adj_A, const int adj_B) {
+    constexpr int outside_speed = 8; // 寻迹时外轮的基础速度
+    constexpr int inside_speed = 5;
+    constexpr int offset_speed = 3;
+    //本来是16 10 6
+    constexpr int default_mid_speed = 15;
+    float scale = 0;
+
+    // A-->C
+    // 手工将小车放在A点，车头朝向B点
+    // 调整
+    Set_PWM(0, 0);
+    PID_clear_A();
+    PID_clear_B();
+    motor_L_run_distance_at_speed(adj_A, 5);
+    delay_ms(1000);
+    set_target_speed(0, 0);
+    enable_acclimit();
+    uint32_t start_time_A = sys_cur_tick_us;
+    while (true) {
+        // 传感器更新
+        gw_gray_serial_read();
+        // 判断
+        // 传感器1检测黑线的位置
+        i16 blackline_pos1 = get_sensor1_blackline_pos();
+        if (blackline_pos1 == -1) {
+            // 未检测到黑线
+            // 保持直行
+            set_target_speed(default_mid_speed, default_mid_speed);
+        } else {
+            // 检测到黑线
+            // 判定时间，若离出发不到1s，则忽略本次检测
+            if (sys_cur_tick_us - start_time_A < 1000000) {
+                continue;
+            }
+            // 到达终点，报警
+            BEEP_ms(1000);
+            break;
+        }
+    }
+    // C-->B
+    // 寻迹
+    disable_acclimit();
+    while (true) {
+        constexpr int left_default_speed = inside_speed;
+        constexpr int right_default_speed = outside_speed;
+        scale = 0;
+        // 传感器更新
+        gw_gray_serial_read();
+        // 判断
+        // 传感器1 2检测黑线的位置
+        i16 blackline_pos1 = get_sensor1_blackline_pos();
+        i16 blackline_pos2 = get_sensor2_blackline_pos();
+        if (blackline_pos1 == -1) {
+            // 前方未检测到黑线
+            // 可能已经到达了B点
+            // 先停车
+            set_target_speed(0, 0);
+            BEEP_ms(1000);
+            break;
+        } else {
+            // 检测到黑线
+            // 根据黑线位置调整车的状态
+            // 黑线在中间则位置是7
+            scale = (blackline_pos1 - 7) * weight_front;
+            // 希望后传感器也是黑线在中间
+            if (blackline_pos2 != -1) {
+                scale += (blackline_pos2 - 7) * weight_mid;
+            }
+            scale *= 0.5;
+
+            u16 target_left_speed = left_default_speed + offset_speed * scale;
+            u16 target_right_speed = right_default_speed - offset_speed * scale;
+            set_target_speed(target_left_speed, target_right_speed);
+        }
+    }
+    // 在B点调整方向，使得车头指向D
+    delay_ms(1000);
+    Set_PWM(0, 0);
+    PID_clear_A();
+    PID_clear_B();
+    motor_R_run_distance_at_speed(adj_B, 5);
+    PID_clear_A();
+    PID_clear_B();
+    delay_ms(1000);
+    set_target_speed(0, 0);
+    enable_acclimit();
+    // B-->D
+    // 直行
+    uint32_t start_time_B = sys_cur_tick_us;
+    while (true) {
+        // 传感器更新
+        gw_gray_serial_read();
+        // 判断
+        // 传感器1检测黑线的位置
+        i16 blackline_pos1 = get_sensor1_blackline_pos();
+        if (blackline_pos1 == -1) {
+            // 未检测到黑线
+            // 保持直行
+            set_target_speed(default_mid_speed, default_mid_speed);
+        } else {
+            // 检测到黑线
+            // 判定时间，若离出发不到1s，则忽略本次检测
+            if (sys_cur_tick_us - start_time_B < 1000000) {
+                continue;
+            }
+            // 到达终点，报警
+            BEEP_ms(1000);
+            break;
+        }
+    }
+    // D-->A
+    // 寻迹
+    disable_acclimit();
+    while (true) {
+        constexpr int left_default_speed = outside_speed;
+        constexpr int right_default_speed = inside_speed;
+        scale = 0;
+        // 传感器更新
+        gw_gray_serial_read();
+        // 判断
+        // 传感器1 2检测黑线的位置
+        i16 blackline_pos1 = get_sensor1_blackline_pos();
+        i16 blackline_pos2 = get_sensor2_blackline_pos();
+        if (blackline_pos1 == -1) {
+            // 前方未检测到黑线
+            // 可能已经到达了A点
+            // 先停车
+            set_target_speed(0, 0);
+            BEEP_ms(1000);
+            break;
+        } else {
+            // 检测到黑线
+            // 根据黑线位置调整车的状态
+            // 黑线在中间则位置是7
+            scale = (blackline_pos1 - 7) * weight_front;
+            // 希望后传感器也是黑线在中间
+            if (blackline_pos2 != -1) {
+                scale += (blackline_pos2 - 7) * weight_mid;
+            }
+            scale *= 0.5;
+
+            u16 target_left_speed = left_default_speed + offset_speed * scale;
+            u16 target_right_speed = right_default_speed - offset_speed * scale;
+            set_target_speed(target_left_speed, target_right_speed);
+        }
+    }
+}
+
+constexpr int adjust_at_A_param = 285;
+constexpr int adjust_at_B_param = 300;
 void go_problem3() {
-    
+    go_problem3_inner_func(adjust_at_A_param, adjust_at_B_param);
 }
 void go_problem4() {
-    
+    int adjust_params[4][2] = {
+        {adjust_at_A_param, adjust_at_B_param},
+        {adjust_at_A_param, adjust_at_B_param},
+        {adjust_at_A_param, adjust_at_B_param},
+        {adjust_at_A_param, adjust_at_B_param},
+    };
+    for (int i = 0; i < 4; ++i) {
+        go_problem3_inner_func(adjust_params[i][0], adjust_params[i][0]);
+        delay_ms(1000);
+    }
 }
 
 void go() {

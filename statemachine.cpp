@@ -1,5 +1,5 @@
 #include "statemachine.hpp"
-problem now_problem = problem_2;
+problem now_problem = problem_4;
 state_machine::state_machine() :
     m_problem(now_problem), m_sp4_round_count(0) {
 }

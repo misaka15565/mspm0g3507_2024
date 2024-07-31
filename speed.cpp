@@ -94,6 +94,7 @@ void motor_L_run_distance(int distance) {
     while (1) {
         if (abs(encoderA_get() - left) > distance) {
             Set_PWM(0, 0);
+            set_target_speed(0, 0);
             break;
         }
     }
@@ -107,6 +108,35 @@ void motor_R_run_distance(int distance) {
     while (1) {
         if (abs(encoderB_get() - right) > distance) {
             Set_PWM(0, 0);
+            set_target_speed(0, 0);
+            break;
+        }
+    }
+    set_target_speed(0, 0);
+}
+
+void motor_L_run_distance_at_speed(int distance, int speed) {
+    int left = encoderA_get();
+    int right = encoderB_get();
+    set_target_speed(speed, 0);
+    while (1) {
+        if (abs(encoderA_get() - left) > distance) {
+            Set_PWM(0, 0);
+            set_target_speed(0, 0);
+            break;
+        }
+    }
+    set_target_speed(0, 0);
+}
+// 使右边的电机按指定速度转动指定的距离，如果不打滑就一定是准的
+void motor_R_run_distance_at_speed(int distance, int speed) {
+    int left = encoderA_get();
+    int right = encoderB_get();
+    set_target_speed(0, speed);
+    while (1) {
+        if (abs(encoderB_get() - right) > distance) {
+            Set_PWM(0, 0);
+            set_target_speed(0, 0);
             break;
         }
     }
