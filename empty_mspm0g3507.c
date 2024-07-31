@@ -75,7 +75,7 @@ int main(void) {
     int angle = 0;
     uint32_t last_time = sys_cur_tick_us;
     uint16_t dmp_try_count = 0;
-    oled_disable_print = 0;
+    oled_disable_print = 1;
     float startyaw[50];
     float baseyaw = 0;
 

@@ -92,10 +92,10 @@ void go_problem1() {
 // 点，再由 C 点自动行驶到 D 点，最后沿半弧线行驶到 A 点停车，每经过一个点，
 // 声光提示一次。完成一圈用时不大于 30 秒。（
 void go_problem2() {
-    constexpr u16 default_mid_speed = 10; // 默认直行速度
-    constexpr u16 default_left_speed = 10;
+    constexpr u16 default_mid_speed = 15; // 默认直行速度
+    constexpr u16 default_left_speed = 15;
     constexpr u16 default_right_speed = 10;
-    constexpr u16 offset_speed = 4;
+    constexpr u16 offset_speed = 6;
     float scale = 0;
 
     // A-->B
@@ -146,7 +146,7 @@ void go_problem2() {
             // 根据黑线位置调整车的状态
             // 黑线在中间则位置是7
             if (blackline_pos1 < 7) {
-                scale = -0.5;
+                scale = -0.4;
             } else if (blackline_pos1 > 7) {
                 scale = 0.5;
             } else {
@@ -238,7 +238,7 @@ void go_problem2() {
             // 根据黑线位置调整车的状态
             // 黑线在中间则位置是7
             if (blackline_pos1 < 7) {
-                scale = -0.5;
+                scale = -0.4;
             } else if (blackline_pos1 > 7) {
                 scale = 0.5;
             } else {

@@ -229,6 +229,38 @@ void pwm_test_menu() {
     Menu_Process((uint8 *)" -=   pwm test   =- ", &prmt, table, menuNum);
 }
 
+static uint16 kp_mul_100 = 0;
+static uint16 ki_mul_100 = 0;
+
+void pid_adjust_menu() {
+    kp_mul_100 = Velcity_Kp * 100;
+    ki_mul_100 = Velcity_Ki * 100;
+    MENU_TABLE table[] = {
+        {(uint8 *)"return ", nullptr, nullptr},
+        {(uint8 *)"kp*100 ++", []() {
+             ++kp_mul_100;
+         },
+         &kp_mul_100},
+        {(uint8 *)"ki*100 ++", []() {
+             ++ki_mul_100;
+         },
+         &ki_mul_100},
+        {(uint8 *)"kp*100 --", []() {
+             --kp_mul_100;
+         },
+         &kp_mul_100},
+        {(uint8 *)"ki*100 --", []() {
+             --ki_mul_100;
+         },
+         &ki_mul_100}};
+    MENU_PRMT prmt;
+    OLED_Clear();
+    uint8 menuNum = sizeof(table) / sizeof(table[0]); // 菜单项数
+    Menu_Process((uint8 *)" -=   pid adjust   =- ", &prmt, table, menuNum);
+    Velcity_Kp= (float)kp_mul_100 / 100.0;
+    Velcity_Ki= (float)ki_mul_100 / 100.0;
+}
+
 // 有捕获的lambda不能转为void(*)()函数指针，所以就这样放着吧
 static uint16 now_problem_id = now_problem;
 void main_menu_start() {
