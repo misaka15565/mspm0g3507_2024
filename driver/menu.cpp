@@ -9,6 +9,7 @@ extern "C" {
 #include "oled.h"
 #include "motor.h"
 #include <stdio.h>
+#include "gyro.h"
 }
 #define PAGE_DISP_NUM 6
 
@@ -292,7 +293,17 @@ void main_menu_start() {
                  close_oled_while_run = false;
              },
              nullptr},
-            {(uint8 *)"pid adjust", pid_adjust_menu, nullptr}};
+            {(uint8 *)"pid adjust", pid_adjust_menu, nullptr},
+            {(uint8 *)"float test", []() {
+                 uint32_t start_time = sys_cur_tick_us;
+                 for (int i = 0; i < 10000; ++i) {
+                     mpu6050_updateYaw();
+                 }
+                 uint32_t end_time = sys_cur_tick_us;
+                 printf("time use %d", end_time - start_time);
+                 delay_ms(3000);
+             },
+             nullptr}};
     // 一级菜单
     MENU_PRMT MainMenu_Prmt;
     OLED_Clear();

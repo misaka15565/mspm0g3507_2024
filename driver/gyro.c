@@ -69,18 +69,47 @@ void mpu6050_prepare() {
             break;
         }
     }
+    for (int i = 0; i < 3; ++i) {
+        mpu6050_updateYaw();
+    }
 }
 
-float mpu60550_JDX(float ny,float ty)//ny为当前偏航角，ty为目标偏航角
-{
-    float zj = ny - ty;
-    if(zj < -180)
-    {
-        zj = 360 + zj;
+float angle_sub(float a, float b) {
+    float res = a - b;
+    if (res > 180) {
+        res -= 360;
     }
-    else if(zj > 180)
-    {
-        zj = -(360 - zj);
+    if (res < -180) {
+        res += 360;
     }
-    return zj;
+    return res;
+}
+
+float angle_add(float a, float b) {
+    float res = a + b;
+    if (res > 180) {
+        res -= 360;
+    }
+    if (res < -180) {
+        res += 360;
+    }
+    return res;
+}
+
+float system_yaw = 0;
+
+//893us
+void mpu6050_updateYaw() {
+    static float yaw_buffer[3] = {};
+    float p, r, y;
+    p = -999;
+    r = -999;
+    y = -999;
+    uint8_t status = mpu_dmp_get_data(&p, &r, &y);
+    if (status == 0) {
+        yaw_buffer[2] = yaw_buffer[1];
+        yaw_buffer[1] = yaw_buffer[0];
+        yaw_buffer[0] = y;
+        system_yaw = (yaw_buffer[0] + yaw_buffer[1] + yaw_buffer[2]) / 3.0;
+    }
 }
