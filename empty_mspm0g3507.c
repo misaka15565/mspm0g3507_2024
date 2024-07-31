@@ -76,6 +76,8 @@ int main(void) {
     uint32_t last_time = sys_cur_tick_us;
     uint16_t dmp_try_count = 0;
     oled_disable_print = 1;
+    float startyaw[50];
+    float baseyaw = 0;
 
     switch (now_problem) {
     case problem_1:
@@ -93,6 +95,7 @@ int main(void) {
     }
     set_target_speed(0, 0);
     oled_disable_print = 0;
+
     while (1) {
         uint32_t time_use = sys_cur_tick_us - last_time;
         last_time = sys_cur_tick_us;
