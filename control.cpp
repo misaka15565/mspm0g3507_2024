@@ -260,11 +260,6 @@ void go_problem2() {
     }
 }
 
-void go_problem3() {
-}
-void go_problem4() {
-}
-
 void go() {
 // #define SUDOER_DEBUG
 #ifdef SUDOER_DEBUG
