@@ -10,21 +10,22 @@ float Velcity_Kp = 1.0, Velcity_Ki = 0.5, Velcity_Kd; // 相关速度PID参数
 入口参数：左右电机的编码器值
 返回值  ：电机的PWM
 ***************************************************************************/
-static volatile int distanceA_buffer[10] = {};
-static volatile int distanceB_buffer[10] = {};
+#define buffer_length 15
+// buffer length同时决定了得到的速度的单位 (编码器刻度每len毫秒)
+static volatile int distanceA_buffer[buffer_length] = {};
+static volatile int distanceB_buffer[buffer_length] = {};
 static volatile int distanceA_buffer_index = 0;
 static volatile int distanceB_buffer_index = 0;
 
 static volatile int speed_B = 0;
 static volatile int speed_A = 0;
 
-void distance_buffer_clear(){
-    for(int i = 0; i < 10; i++){
+void distance_buffer_clear() {
+    for (int i = 0; i < buffer_length; i++) {
         distanceA_buffer[i] = 0;
         distanceB_buffer[i] = 0;
     }
 }
-
 
 // 每ms获取一次累计脉冲数，以本次获取的值减去上10ms的值，得到速度
 void update_speed_irq() {
@@ -34,8 +35,8 @@ void update_speed_irq() {
     distanceB_buffer[distanceB_buffer_index] = encoderB_get();
     speed_A = distanceA_buffer[distanceA_buffer_index] - last_10ms_distance_A;
     speed_B = distanceB_buffer[distanceB_buffer_index] - last_10ms_distance_B;
-    distanceA_buffer_index = (distanceA_buffer_index + 1) % 10;
-    distanceB_buffer_index = (distanceB_buffer_index + 1) % 10;
+    distanceA_buffer_index = (distanceA_buffer_index + 1) % buffer_length;
+    distanceB_buffer_index = (distanceB_buffer_index + 1) % buffer_length;
 }
 int motorB_getspeed() {
     return abs(speed_B);
