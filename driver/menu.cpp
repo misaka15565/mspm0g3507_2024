@@ -402,6 +402,13 @@ void turn_direction_adjust_menu() {
              adjust_uint16_param_menu_core("at_B_par", adjust_at_B_param);
          },
          nullptr},
+        {(uint8 *)"overwrite", []() {
+             for (int i = 0; i < 4; ++i) {
+                 adjust_params[i][0] = adjust_at_A_param;
+                 adjust_params[i][1] = adjust_at_B_param;
+             }
+         },
+         nullptr},
         {(uint8 *)"adj_params[0][0]", []() {
              adjust_uint16_param_menu_core("params[0][0]", adjust_params[0][0]);
          },
