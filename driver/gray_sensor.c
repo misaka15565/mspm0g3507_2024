@@ -134,10 +134,10 @@ void gw_gray_update_irq() {
     sensor1_res_flitered = 0;
     sensor2_res_flitered = 0;
     for (int i = 0; i < 8; ++i) {
-        if (sensor1_last10_isblack_count[i] < 6) {
+        if (sensor1_last10_isblack_count[i] < 3) {
             sensor1_res_flitered |= 1 << i;
         }
-        if (sensor2_last10_isblack_count[i] < 6) {
+        if (sensor2_last10_isblack_count[i] < 3) {
             sensor2_res_flitered |= 1 << i;
         }
     }

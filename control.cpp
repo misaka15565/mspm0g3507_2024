@@ -125,6 +125,7 @@ line_patrol_output line_patrol_core(uint32_t starttime) {
         // 1在右，2在左，右转
         ret.scale = (blackline_pos1 - mid_pos) * weight_front;
         ret.scale -= (blackline_pos2 - mid_pos) * weight_mid;
+        ret.scale /= 2;
     }
     return ret;
 }
@@ -161,7 +162,7 @@ void go_problem1() {
     }
 }
 
-constexpr int outside_speed_default = 16; // 寻迹时外轮的基础速度
+constexpr int outside_speed_default = 15; // 寻迹时外轮的基础速度
 constexpr int inside_speed_default = 10;
 constexpr int offset_speed_default = 6;
 // 本来是16 10 6
@@ -460,10 +461,10 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
 uint16_t adjust_at_A_param = 270;
 uint16_t adjust_at_B_param = 310;
 uint16_t adjust_params[4][2] = {
-    {adjust_at_A_param, adjust_at_B_param},
-    {adjust_at_A_param, adjust_at_B_param},
-    {adjust_at_A_param, adjust_at_B_param},
-    {adjust_at_A_param, adjust_at_B_param},
+    {270, 310},
+    {270, 310},
+    {280, 320},
+    {290, 330},
 };
 void go_problem3() {
     go_problem3_inner_func(adjust_at_A_param, adjust_at_B_param);
