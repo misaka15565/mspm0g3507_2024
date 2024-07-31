@@ -445,7 +445,10 @@ void param_adjust_menu() {
     MENU_TABLE table[] = {
         {(uint8 *)"return ", nullptr, nullptr},
         //{(uint8 *)"time adjust", adjust_time_adjust, nullptr},
-        {(uint8 *)"pwm test", pwm_test_menu, nullptr},
+        {(uint8 *)"micro distance", []() {
+             adjust_uint16_param_menu_core("micro distance", distance_adjust_after_leave_blackline);
+         },
+         nullptr},
         {(uint8 *)"pid adjust", pid_adjust_menu, nullptr},
         {(uint8 *)"adj weight mid", []() {
              adjust_float_param_menu_core("w_mid", weight_mid);

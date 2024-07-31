@@ -13,6 +13,7 @@ void go_problem4();
 extern float weight_front;
 extern float weight_mid;
 extern uint16_t adjust_at_A_param, adjust_at_B_param;
+extern uint16_t distance_adjust_after_leave_blackline;
 extern uint16_t adjust_params[4][2];
 #ifdef __cplusplus
 }
