@@ -163,10 +163,10 @@ GPIO8.associatedPins[0].assignedPin  = "0";
 GPIO8.associatedPins[0].pin.$assign  = "PB0";
 
 GPIO9.$name                         = "LED_Board";
-GPIO9.port                          = "PORTA";
+GPIO9.port                          = "PORTB";
 GPIO9.associatedPins[0].$name       = "LED0";
-GPIO9.associatedPins[0].assignedPin = "0";
-GPIO9.associatedPins[0].pin.$assign = "PA0";
+GPIO9.associatedPins[0].assignedPin = "5";
+GPIO9.associatedPins[0].pin.$assign = "PB5";
 
 I2C1.$name                             = "I2C_MPU6050";
 I2C1.basicEnableController             = true;

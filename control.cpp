@@ -44,6 +44,12 @@ constexpr uint32_t time_half_circle_need = 5 * 1000000;
 
 constexpr uint32_t half_circle_outside_distance = 8467 - 3419 - 400;
 constexpr uint32_t half_circle_inside_distance = 7100 - 3408 - 400;
+
+// 对角线长度4354编码器刻度
+constexpr uint32_t diagonal_distance = 4354;
+
+uint16_t diagonal_tol_distance = 30;
+
 enum direction {
     LEFT,
     RIGHT
@@ -470,16 +476,27 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
     set_target_speed(0, 0);
     enable_acclimit();
     uint32_t start_time_A = sys_cur_tick_us;
+    int distance_L_start1 = abs(encoderA_get());
+    int distance_R_start1 = abs(encoderB_get());
     while (true) {
         // 传感器更新
-
+        int distance_L_now = abs(encoderA_get());
+        int distance_R_now = abs(encoderB_get());
+        int distance_L = distance_L_now - distance_L_start1;
+        int distance_R = distance_R_now - distance_R_start1;
+        int distance_mid = (distance_L + distance_R) / 2;
         // 判断
         // 传感器1检测黑线的位置
         i16 blackline_pos1 = get_sensor1_blackline_pos();
         if (blackline_pos1 == -1) {
             // 未检测到黑线
-            // 保持直行
-            set_target_speed(default_mid_speed, default_mid_speed);
+            // 如果行驶的距离超过了对角线长度+tol并且没检测到黑线，尝试向内转弯来营救
+            if (distance_mid > diagonal_distance + diagonal_tol_distance) {
+                // 转弯
+                set_target_speed(default_mid_speed - 2, default_mid_speed + 2);
+            } else {
+                set_target_speed(default_mid_speed, default_mid_speed);
+            }
         } else {
             // 检测到黑线
             // 判定时间，若离出发不到1s，则忽略本次检测
@@ -536,16 +553,28 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
     // B-->D
     // 直行
     uint32_t start_time_B = sys_cur_tick_us;
+    int distance_L_start2 = abs(encoderA_get());
+    int distance_R_start2 = abs(encoderB_get());
     while (true) {
         // 传感器更新
+        int distance_L_now = abs(encoderA_get());
+        int distance_R_now = abs(encoderB_get());
+        int distance_L = distance_L_now - distance_L_start2;
+        int distance_R = distance_R_now - distance_R_start2;
+        int distance_mid = (distance_L + distance_R) / 2;
 
         // 判断
         // 传感器1检测黑线的位置
         i16 blackline_pos1 = get_sensor1_blackline_pos();
         if (blackline_pos1 == -1) {
-            // 未检测到黑线
-            // 保持直行
-            set_target_speed(default_mid_speed, default_mid_speed);
+            if (distance_mid > diagonal_distance + diagonal_tol_distance) {
+                // 转弯
+                set_target_speed(default_mid_speed + 2, default_mid_speed - 2);
+            } else {
+                // 未检测到黑线
+                // 保持直行
+                set_target_speed(default_mid_speed, default_mid_speed);
+            }
         } else {
             // 检测到黑线
             // 判定时间，若离出发不到1s，则忽略本次检测
@@ -592,20 +621,20 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
     delay_ms(500);
 }
 
-uint16_t adjust_at_A_param = 260;
-uint16_t adjust_at_B_param = 330;
+uint16_t adjust_at_A_param = 240;
+uint16_t adjust_at_B_param = 380;
 uint16_t adjust_params[4][2] = {
-    {270, 310},
-    {270, 310},
-    {280, 320},
-    {290, 330},
+    {240, 380},
+    {260, 370},
+    {260, 370},
+    {260, 370},
 };
 void go_problem3() {
     go_problem3_inner_func(adjust_at_A_param, adjust_at_B_param);
 }
 void go_problem4() {
     for (int i = 0; i < 4; ++i) {
-        go_problem3_inner_func(adjust_params[i][0], adjust_params[i][0]);
+        go_problem3_inner_func(adjust_params[i][0], adjust_params[i][1]);
     }
 }
 

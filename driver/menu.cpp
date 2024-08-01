@@ -1,5 +1,4 @@
 #include "menu.hpp"
-
 #include "speed.hpp"
 #include "ti_msp_dl_config.h"
 #include <cstdint>
@@ -8,6 +7,7 @@
 #include "control.hpp"
 #include "statemachine.hpp"
 extern "C" {
+#include "driver/BEEP.h"
 #include "oled.h"
 #include "motor.h"
 #include <stdio.h>
@@ -630,7 +630,7 @@ void main_menu_start() {
                  set_target_speed(0, 0);
              },
              nullptr},
-        };
+            {(uint8 *)"beep", []() { BEEP_ms(1000); }, nullptr}};
     // 一级菜单
     MENU_PRMT MainMenu_Prmt;
     OLED_Clear();
