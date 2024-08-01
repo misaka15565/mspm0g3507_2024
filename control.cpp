@@ -529,7 +529,7 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
             // 如果行驶的距离超过了对角线长度+tol并且没检测到黑线，尝试向内转弯来营救
             if (distance_mid > diagonal_distance + diagonal_tol_distance) {
                 // 转弯
-                set_target_speed(default_mid_speed - 10, default_mid_speed + 2);
+                set_target_speed(0, default_mid_speed);
             } else {
                 set_target_speed(default_mid_speed, default_mid_speed);
             }
@@ -562,8 +562,21 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
             // 可能已经到达了A点
             // 先停车
             set_target_speed(0, 0);
-            BEEP_ms(1000);
-            break;
+            bool need_switch_to_next_status = true;
+
+            for (int i = 0; i < 100; ++i) {
+                if (get_sensor1_blackline_pos() != -1) {
+                    // 又检测到了黑线
+                    need_switch_to_next_status = false;
+                    break;
+                }
+                delay_ms(1);
+            }
+
+            if (need_switch_to_next_status) {
+                BEEP_ms(1000);
+                break;
+            }
         } else {
             float scale = ret.scale;
 
@@ -605,7 +618,7 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
         if (blackline_pos1 == -1) {
             if (distance_mid > diagonal_distance + diagonal_tol_distance) {
                 // 转弯
-                set_target_speed(default_mid_speed + 2, default_mid_speed - 10);
+                set_target_speed(default_mid_speed, 0);
             } else {
                 // 未检测到黑线
                 // 保持直行
@@ -640,9 +653,21 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
             // 未检测到黑线
             // 可能已经到达了A点
             // 先停车
-            set_target_speed(0, 0);
-            BEEP_ms(1000);
-            break;
+            bool need_switch_to_next_status = true;
+
+            for (int i = 0; i < 100; ++i) {
+                if (get_sensor1_blackline_pos() != -1) {
+                    // 又检测到了黑线
+                    need_switch_to_next_status = false;
+                    break;
+                }
+                delay_ms(1);
+            }
+
+            if (need_switch_to_next_status) {
+                BEEP_ms(1000);
+                break;
+            }
         } else {
             float scale = ret.scale;
 
@@ -661,9 +686,9 @@ uint16_t adjust_at_A_param = 240;
 uint16_t adjust_at_B_param = 380;
 uint16_t adjust_params[4][2] = {
     {240, 380},
-    {300, 380},
-    {300, 380},
-    {300, 380},
+    {305, 370},
+    {305, 370},
+    {305, 370},
 };
 void go_problem3() {
     go_problem3_inner_func(adjust_at_A_param, adjust_at_B_param);
