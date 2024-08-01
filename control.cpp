@@ -31,6 +31,9 @@ float weight_front = 0.15;
 float weight_mid = 0.07;
 uint16_t distance_adjust_after_leave_blackline = 2;
 constexpr uint32_t time_half_circle_need = 5 * 1000000;
+
+constexpr uint32_t half_circle_outside_distance = 8467 - 3419 - 100;
+constexpr uint32_t half_circle_inside_distance = 7100 - 3408 - 100;
 enum direction {
     LEFT,
     RIGHT
@@ -77,6 +80,34 @@ i16 get_sensor2_blackline_pos() {
         return -1;
     }
     return sum / black_count;
+}
+
+// 姿态调整核心
+void posture_adjust_core(const i16 target_pos) {
+    while (true) {
+        i16 pos = get_sensor2_blackline_pos();
+        oled_print(7, "pos %d sensor %02X", pos, sensor2_res_flitered);
+        OLED_Refresh();
+        if (pos == -1) {
+            set_target_speed(0, 0);
+            break;
+        } else if (pos < target_pos) {
+            motor_L_run_distance(1);
+        } else if (pos > target_pos) {
+            motor_R_run_distance(1);
+        } else {
+            set_target_speed(0, 0);
+            break;
+        }
+    }
+}
+
+// 姿态调整测试
+void posture_adjust_test(i16 target_pos) {
+    uint8_t tmp = oled_disable_print;
+    oled_disable_print = 0;
+    posture_adjust_core(target_pos);
+    oled_disable_print = tmp;
 }
 
 struct line_patrol_output {
@@ -263,41 +294,7 @@ void go_problem2() {
     OLED_Refresh();
     i16 last_blackline_pos2 = -1;
     char last_run_motor = 'x';
-    while (true) {
-        // 更新传感器
-
-        // 判断
-        // 保持右轮不动，左轮转动，让黑线在后传感器的12处
-
-        i16 blackline_pos2 = get_sensor2_blackline_pos();
-        if (blackline_pos2 == -1) {
-            // 后面未检测到黑线
-            // 得稍微动一下
-            set_target_speed(0, 0);
-            if (last_run_motor == 'L') {
-                motor_L_run_distance(1);
-            } else if (last_run_motor == 'R') {
-                motor_R_run_distance(1);
-            } else {
-                motor_R_run_distance(1);
-            }
-            if (last_blackline_pos2 == 14 || last_blackline_pos2 == 0) {
-                BEEP_ms(5000);
-                break;
-            }
-        } else if (blackline_pos2 == 9 || blackline_pos2 == 10) {
-            // 进入下个阶段
-            set_target_speed(0, 0);
-            break;
-        } else if (blackline_pos2 < 9) {
-            motor_L_run_distance(1);
-            last_run_motor = 'L';
-        } else {
-            motor_R_run_distance(1);
-            last_run_motor = 'R';
-        }
-        if (blackline_pos2 != -1) last_blackline_pos2 = blackline_pos2;
-    }
+    posture_adjust_core(5);
     PID_clear_A();
     PID_clear_B();
 

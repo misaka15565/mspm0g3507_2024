@@ -538,6 +538,12 @@ void main_menu_start() {
              },
              &close_oled_while_run},
             {(uint8 *)"adj parmas", param_adjust_menu, nullptr},
+            {(uint8 *)"posture adj test", []() {
+                 delay_ms(1000);
+                 posture_adjust_test(5);
+                 KeySan();
+             },
+             nullptr},
         };
     // 一级菜单
     MENU_PRMT MainMenu_Prmt;
