@@ -42,8 +42,8 @@ i16 posture_tar_to_prob3_counter_clockwise = 9;
 
 constexpr uint32_t time_half_circle_need = 5 * 1000000;
 
-constexpr uint32_t half_circle_outside_distance = 8467 - 3419 - 300;
-constexpr uint32_t half_circle_inside_distance = 7100 - 3408 - 300;
+constexpr uint32_t half_circle_outside_distance = 8467 - 3419 - 400;
+constexpr uint32_t half_circle_inside_distance = 7100 - 3408 - 400;
 enum direction {
     LEFT,
     RIGHT
@@ -293,7 +293,6 @@ void go_problem1() {
     }
 }
 
-
 // 本来是16 10 6
 
 // 将小车放在位置 A 点，小车能自动行驶到 B 点后，沿半弧线行驶到 C
@@ -379,7 +378,7 @@ void go_problem2() {
     // 调整角度，使车头指向D
     oled_print(0, "adjust direction C->D");
     OLED_Refresh();
-    //posture_adjust_core(posture_tar_from_prob2, posture_tar_to_prob3);
+    // posture_adjust_core(posture_tar_from_prob2, posture_tar_to_prob3);
     PID_clear_A();
     PID_clear_B();
 

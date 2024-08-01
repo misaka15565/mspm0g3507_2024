@@ -232,8 +232,8 @@ void pwm_test_menu() {
     Menu_Process((uint8 *)" -=   pwm test   =- ", &prmt, table, menuNum);
 }
 
-static uint16 kp_mul_100 = 0;
-static uint16 ki_mul_100 = 0;
+static uint16 kp_mul_1000 = 0;
+static uint16 ki_mul_1000 = 0;
 
 static uint16 adjust_param_uint_core_temp;
 // 通用uint16调参核心
@@ -378,8 +378,8 @@ void adjust_float_param_menu_core(char *name, float &ref) {
 }
 
 void pid_adjust_menu() {
-    kp_mul_100 = Velcity_Kp * 100;
-    ki_mul_100 = Velcity_Ki * 100;
+    kp_mul_1000 = Velcity_Kp * 1000;
+    ki_mul_1000 = Velcity_Ki * 1000;
     MENU_TABLE table[] = {
         {(uint8 *)"return ", nullptr, nullptr},
         {(uint8 *)"try run R motor", []() {
@@ -416,28 +416,44 @@ void pid_adjust_menu() {
              }
          },
          nullptr},
-        {(uint8 *)"kp*100 ++", []() {
-             ++kp_mul_100;
+        {(uint8 *)"kp*1000 +10", []() {
+             kp_mul_1000 += 10;
          },
-         &kp_mul_100},
-        {(uint8 *)"ki*100 ++", []() {
-             ++ki_mul_100;
+         &kp_mul_1000},
+        {(uint8 *)"ki*1000 +10", []() {
+             ki_mul_1000 += 10;
          },
-         &ki_mul_100},
-        {(uint8 *)"kp*100 --", []() {
-             --kp_mul_100;
+         &ki_mul_1000},
+        {(uint8 *)"kp*1000 -10", []() {
+             kp_mul_1000 -= 10;
          },
-         &kp_mul_100},
-        {(uint8 *)"ki*100 --", []() {
-             --ki_mul_100;
+         &kp_mul_1000},
+        {(uint8 *)"ki*1000 -10", []() {
+             ki_mul_1000 -= 10;
          },
-         &ki_mul_100}};
+         &ki_mul_1000},
+        {(uint8 *)"kp*1000 ++", []() {
+             ++kp_mul_1000;
+         },
+         &kp_mul_1000},
+        {(uint8 *)"ki*1000 ++", []() {
+             ++ki_mul_1000;
+         },
+         &ki_mul_1000},
+        {(uint8 *)"kp*1000 --", []() {
+             --kp_mul_1000;
+         },
+         &kp_mul_1000},
+        {(uint8 *)"ki*1000 --", []() {
+             --ki_mul_1000;
+         },
+         &ki_mul_1000}};
     MENU_PRMT prmt;
     OLED_Clear();
     uint8 menuNum = sizeof(table) / sizeof(table[0]); // 菜单项数
     Menu_Process((uint8 *)" -=   pid adjust   =- ", &prmt, table, menuNum);
-    Velcity_Kp = (float)kp_mul_100 / 100.0;
-    Velcity_Ki = (float)ki_mul_100 / 100.0;
+    Velcity_Kp = (float)kp_mul_1000 / 1000.0;
+    Velcity_Ki = (float)ki_mul_1000 / 1000.0;
 }
 
 void turn_direction_adjust_menu() {
