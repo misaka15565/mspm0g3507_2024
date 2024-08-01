@@ -509,6 +509,13 @@ void main_menu_start() {
                      break;
                  case problem_2:
                      go_problem2();
+                     oled_disable_print = 0;
+                     OLED_Clear();
+                     for (int i = 0; i < 6; ++i) {
+                         oled_print(i, "%d %d", prob2_distances_record[0][i], prob2_distances_record[1][i]);
+                     }
+                     OLED_Refresh();
+                     KeySan();
                      break;
                  case problem_3:
                      go_problem3();

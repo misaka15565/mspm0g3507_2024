@@ -1,7 +1,9 @@
 #include "control.hpp"
+#include <cstring>
 extern "C" {
 uint16_t time_adjust = 500;
 #include "driver/motor.h"
+#include "driver/encoder.h"
 #include "driver/gray_sensor.h"
 #include "driver/oled.h"
 #include "driver/BEEP.h"
@@ -28,6 +30,20 @@ using i16 = int16_t;
 float weight_front = 0.15;
 float weight_mid = 0.07;
 uint16_t distance_adjust_after_leave_blackline = 2;
+constexpr uint32_t time_half_circle_need = 5 * 1000000;
+enum direction {
+    LEFT,
+    RIGHT
+};
+
+void micro_adjust(direction d) {
+    if (distance_adjust_after_leave_blackline == 0) return;
+    if (d == LEFT) {
+        motor_R_run_distance(distance_adjust_after_leave_blackline);
+    } else {
+        motor_L_run_distance(distance_adjust_after_leave_blackline);
+    }
+}
 
 // 返回-1说明没黑线
 // 0是黑线在传感器最左，14是黑线在传感器最右
@@ -171,7 +187,12 @@ constexpr int offset_speed_default = 6;
 // 点，再由 C 点自动行驶到 D 点，最后沿半弧线行驶到 A 点停车，每经过一个点，
 // 声光提示一次。完成一圈用时不大于 30 秒。（
 
+int prob2_distances_record[2][6] = {};
+
 void go_problem2() {
+    memset(prob2_distances_record, 0, sizeof(prob2_distances_record));
+    prob2_distances_record[0][0] = encoderA_get();
+    prob2_distances_record[1][0] = encoderB_get();
     constexpr u16 default_mid_speed = 15; // 默认直行速度
     constexpr u16 default_left_speed = outside_speed_default;
     constexpr u16 default_right_speed = inside_speed_default;
@@ -205,6 +226,9 @@ void go_problem2() {
             break;
         }
     }
+    prob2_distances_record[0][1] = encoderA_get();
+    prob2_distances_record[1][1] = encoderB_get();
+
     // B-->C，寻迹
     oled_print(0, "B->C");
     OLED_Refresh();
@@ -227,17 +251,19 @@ void go_problem2() {
             set_target_speed(target_left_speed, target_right_speed);
         }
     }
+
+    prob2_distances_record[0][2] = encoderA_get();
+    prob2_distances_record[1][2] = encoderB_get();
+
     // 向右微调一定编码器值
     // 左电机运动
-    motor_L_run_distance(distance_adjust_after_leave_blackline);
+    micro_adjust(RIGHT);
     // 调整角度，使车头指向D
     oled_print(0, "adjust direction C->D");
     OLED_Refresh();
     i16 last_blackline_pos2 = -1;
     char last_run_motor = 'x';
     while (true) {
-        // 不调了
-        break;
         // 更新传感器
 
         // 判断
@@ -249,21 +275,21 @@ void go_problem2() {
             // 得稍微动一下
             set_target_speed(0, 0);
             if (last_run_motor == 'L') {
-                motor_R_run_distance(1);
+                motor_L_run_distance(1);
             } else if (last_run_motor == 'R') {
-                motor_L_run_distance(1);
+                motor_R_run_distance(1);
             } else {
-                motor_L_run_distance(1);
+                motor_R_run_distance(1);
             }
             if (last_blackline_pos2 == 14 || last_blackline_pos2 == 0) {
                 BEEP_ms(5000);
                 break;
             }
-        } else if (blackline_pos2 == 7) {
+        } else if (blackline_pos2 == 9 || blackline_pos2 == 10) {
             // 进入下个阶段
             set_target_speed(0, 0);
             break;
-        } else if (blackline_pos2 < 7) {
+        } else if (blackline_pos2 < 9) {
             motor_L_run_distance(1);
             last_run_motor = 'L';
         } else {
@@ -274,6 +300,10 @@ void go_problem2() {
     }
     PID_clear_A();
     PID_clear_B();
+
+    prob2_distances_record[0][3] = encoderA_get();
+    prob2_distances_record[1][3] = encoderB_get();
+
     // delay_ms(1000);
     //  C-->D
     uint32_t start_time_C = sys_cur_tick_us;
@@ -301,6 +331,10 @@ void go_problem2() {
             break;
         }
     }
+
+    prob2_distances_record[0][4] = encoderA_get();
+    prob2_distances_record[1][4] = encoderB_get();
+
     // D-->A，寻迹
     oled_print(0, "D->A");
     OLED_Refresh();
@@ -323,6 +357,9 @@ void go_problem2() {
             set_target_speed(target_left_speed, target_right_speed);
         }
     }
+
+    prob2_distances_record[0][5] = encoderA_get();
+    prob2_distances_record[1][5] = encoderB_get();
 }
 
 // 将小车放在位置 A 点，小车能自动行驶到 C 点后，沿半弧线行驶到 B
@@ -398,7 +435,7 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
     PID_clear_B();
     // 先微调
     // 右电机运动
-    motor_R_run_distance(distance_adjust_after_leave_blackline);
+    micro_adjust(LEFT);
     motor_R_run_distance_at_speed(adj_B, 5);
     PID_clear_A();
     PID_clear_B();
@@ -454,7 +491,7 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
     }
     // 运动到A后，微调方向
     // 左电机运动
-    motor_L_run_distance(distance_adjust_after_leave_blackline);
+    micro_adjust(RIGHT);
     delay_ms(500);
 }
 

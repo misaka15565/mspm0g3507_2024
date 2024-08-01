@@ -90,7 +90,7 @@ void speed_pid_irqHandler() {
 void motor_L_run_distance(int distance) {
     int left = encoderA_get();
     int right = encoderB_get();
-    set_target_speed(1, 0);
+    set_target_speed(5, 0);
     while (1) {
         if (abs(encoderA_get() - left) > distance) {
             Set_PWM(0, 0);
@@ -104,7 +104,7 @@ void motor_L_run_distance(int distance) {
 void motor_R_run_distance(int distance) {
     int left = encoderA_get();
     int right = encoderB_get();
-    set_target_speed(0, 1);
+    set_target_speed(0, 5);
     while (1) {
         if (abs(encoderB_get() - right) > distance) {
             Set_PWM(0, 0);
@@ -116,6 +116,7 @@ void motor_R_run_distance(int distance) {
 }
 
 void motor_L_run_distance_at_speed(int distance, int speed) {
+    speed *= 2;
     int left = encoderA_get();
     int right = encoderB_get();
     set_target_speed(speed, 0);

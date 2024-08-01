@@ -7,6 +7,7 @@ extern "C" {
 extern uint16_t time_adjust;
 void go();
 void go_problem1();
+extern int prob2_distances_record[2][6];
 void go_problem2();
 void go_problem3();
 void go_problem4();
