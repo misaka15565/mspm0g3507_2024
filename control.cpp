@@ -98,6 +98,26 @@ i16 get_sensor2_blackline_pos() {
     return sum / black_count;
 }
 
+i16 get_sensor1_black_count() {
+    i16 black_count = 0;
+    for (int i = 0; i < 8; ++i) {
+        if (sensor1_get(i) == 0) {
+            ++black_count;
+        }
+    }
+    return black_count;
+}
+
+i16 get_sensor2_black_count() {
+    i16 black_count = 0;
+    for (int i = 0; i < 8; ++i) {
+        if (sensor2_get(i) == 0) {
+            ++black_count;
+        }
+    }
+    return black_count;
+}
+
 // 姿态调整核心
 void posture_adjust_core(const i16 target_pos_from, const i16 target_pos_to) {
     // 先调整到target_pos_from，然后调整到target_pos_to
@@ -264,6 +284,22 @@ line_patrol_output line_patrol_core(line_patrol_input input) {
         ret.scale -= (blackline_pos2 - mid_pos) * weight_mid;
         ret.scale /= 2;
     }
+    if (fabsf(ret.scale) > 0.5) {
+        float sign = 1.0;
+        if (ret.scale < 0) sign = -1.0;
+        ret.scale = 0.5 + 2.0 * (fabsf(ret.scale) - 0.5);
+        ret.scale *= sign;
+    }
+
+    if (get_sensor1_black_count() > 4) {
+        if (input.dir == counter_clockwise) {
+            // 大幅左转
+            ret.scale = -2;
+        } else {
+            ret.scale = 2;
+        }
+    }
+
     return ret;
 }
 
@@ -622,12 +658,12 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
 }
 
 uint16_t adjust_at_A_param = 240;
-uint16_t adjust_at_B_param = 370;
+uint16_t adjust_at_B_param = 380;
 uint16_t adjust_params[4][2] = {
-    {240, 370},
-    {300, 370},
-    {300, 370},
-    {300, 370},
+    {240, 380},
+    {300, 380},
+    {290, 370},
+    {290, 370},
 };
 void go_problem3() {
     go_problem3_inner_func(adjust_at_A_param, adjust_at_B_param);
