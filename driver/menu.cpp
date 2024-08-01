@@ -604,6 +604,16 @@ void main_menu_start() {
                  KeySan();
              },
              nullptr},
+            {(uint8 *)"circle noadj test", []() {
+                 PID_clear_A();
+                 PID_clear_B();
+                 set_target_speed(0, 0);
+                 delay_ms(1000);
+                 set_target_speed(outside_speed_default, inside_speed_default);
+                 delay_ms(4800);
+                 set_target_speed(0, 0);
+             },
+             nullptr},
         };
     // 一级菜单
     MENU_PRMT MainMenu_Prmt;

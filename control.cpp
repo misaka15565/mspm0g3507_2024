@@ -29,7 +29,7 @@ using i16 = int16_t;
 
 float weight_front = 0.15;
 float weight_mid = 0.07;
-uint16_t distance_adjust_after_leave_blackline = 2;
+uint16_t distance_adjust_after_leave_blackline = 0;
 
 i16 posture_tar_from_prob2 = 6;
 i16 posture_tar_to_prob3 = 5;
@@ -293,9 +293,7 @@ void go_problem1() {
     }
 }
 
-constexpr int outside_speed_default = 15; // 寻迹时外轮的基础速度
-constexpr int inside_speed_default = 10;
-constexpr int offset_speed_default = 6;
+
 // 本来是16 10 6
 
 // 将小车放在位置 A 点，小车能自动行驶到 B 点后，沿半弧线行驶到 C
@@ -381,8 +379,6 @@ void go_problem2() {
     // 调整角度，使车头指向D
     oled_print(0, "adjust direction C->D");
     OLED_Refresh();
-    i16 last_blackline_pos2 = -1;
-    char last_run_motor = 'x';
     //posture_adjust_core(posture_tar_from_prob2, posture_tar_to_prob3);
     PID_clear_A();
     PID_clear_B();

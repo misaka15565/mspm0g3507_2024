@@ -4,7 +4,7 @@
 #include "ti_msp_dl_config.h"
 #include <stdlib.h>
 
-float Velcity_Kp = 0.6, Velcity_Ki = 0.3, Velcity_Kd; // 相关速度PID参数
+float Velcity_Kp = 1.0, Velcity_Ki = 0.5, Velcity_Kd; // 相关速度PID参数
 /***************************************************************************
 函数功能：电机的PID闭环控制
 入口参数：左右电机的编码器值

@@ -19,7 +19,11 @@ extern float weight_mid;
 extern uint16_t adjust_at_A_param, adjust_at_B_param;
 extern uint16_t distance_adjust_after_leave_blackline;
 extern uint16_t adjust_params[4][2];
+
 #ifdef __cplusplus
 }
+constexpr int outside_speed_default = 16; // 寻迹时外轮的基础速度
+constexpr int inside_speed_default = 12;
+constexpr int offset_speed_default = 5;
 #endif
 #endif
