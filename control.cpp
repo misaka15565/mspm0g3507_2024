@@ -259,7 +259,7 @@ void go_problem2() {
                 BEEP_ms(5000);
                 break;
             }
-        } else if (blackline_pos2 == 8) {
+        } else if (blackline_pos2 == 7) {
             // 进入下个阶段
             set_target_speed(0, 0);
             break;
@@ -267,7 +267,7 @@ void go_problem2() {
             motor_L_run_distance(1);
             last_run_motor = 'L';
         } else {
-            motor_R_run_distance(7);
+            motor_R_run_distance(1);
             last_run_motor = 'R';
         }
         if (blackline_pos2 != -1) last_blackline_pos2 = blackline_pos2;
@@ -458,8 +458,8 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
     delay_ms(500);
 }
 
-uint16_t adjust_at_A_param = 270;
-uint16_t adjust_at_B_param = 310;
+uint16_t adjust_at_A_param = 260;
+uint16_t adjust_at_B_param = 330;
 uint16_t adjust_params[4][2] = {
     {270, 310},
     {270, 310},
