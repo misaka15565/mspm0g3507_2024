@@ -529,7 +529,7 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
             // 如果行驶的距离超过了对角线长度+tol并且没检测到黑线，尝试向内转弯来营救
             if (distance_mid > diagonal_distance + diagonal_tol_distance) {
                 // 转弯
-                set_target_speed(default_mid_speed - 2, default_mid_speed + 2);
+                set_target_speed(default_mid_speed - 10, default_mid_speed + 2);
             } else {
                 set_target_speed(default_mid_speed, default_mid_speed);
             }
@@ -605,7 +605,7 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
         if (blackline_pos1 == -1) {
             if (distance_mid > diagonal_distance + diagonal_tol_distance) {
                 // 转弯
-                set_target_speed(default_mid_speed + 2, default_mid_speed - 2);
+                set_target_speed(default_mid_speed + 2, default_mid_speed - 10);
             } else {
                 // 未检测到黑线
                 // 保持直行
@@ -662,8 +662,8 @@ uint16_t adjust_at_B_param = 380;
 uint16_t adjust_params[4][2] = {
     {240, 380},
     {300, 380},
-    {290, 370},
-    {290, 370},
+    {300, 380},
+    {300, 380},
 };
 void go_problem3() {
     go_problem3_inner_func(adjust_at_A_param, adjust_at_B_param);
