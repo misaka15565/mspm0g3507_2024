@@ -383,7 +383,7 @@ void go_problem2() {
     OLED_Refresh();
     i16 last_blackline_pos2 = -1;
     char last_run_motor = 'x';
-    posture_adjust_core(posture_tar_from_prob2, posture_tar_to_prob3);
+    //posture_adjust_core(posture_tar_from_prob2, posture_tar_to_prob3);
     PID_clear_A();
     PID_clear_B();
 
