@@ -273,6 +273,58 @@ void adjust_uint16_param_menu_core(char *name, uint16 &ref) {
     Menu_Process((uint8 *)name, &subMenu1_Prmt, subMenu1_Table, menuNum);
     ref = adjust_param_uint_core_temp;
 }
+
+static int16_t adjust_param_int_core_temp;
+static char adjust_param_int16_name_tmp[64];
+static char *adjust_param_int16_name;
+// 通用int16调参核心
+void adjust_int16_param_menu_core(char *name, int16_t &ref) {
+    adjust_param_int_core_temp = ref;
+    adjust_param_int16_name = name;
+    sprintf(adjust_param_int16_name_tmp, "%s %d", name, ref);
+    MENU_TABLE subMenu1_Table[] =
+        {
+            {(uint8 *)"return ", nullptr, nullptr},
+            {(uint8 *)"+1 val", []() {
+                 ++adjust_param_int_core_temp;
+                 sprintf(adjust_param_int16_name_tmp, "%s %d", adjust_param_int16_name, adjust_param_int_core_temp);
+             },
+             nullptr},
+            {(uint8 *)"-1 val", []() {
+                 if (adjust_param_int_core_temp >= 1)
+                     --adjust_param_int_core_temp;
+                 sprintf(adjust_param_int16_name_tmp, "%s %d", adjust_param_int16_name, adjust_param_int_core_temp);
+             },
+             nullptr},
+            {(uint8 *)"+10 val", []() {
+                 adjust_param_int_core_temp += 10;
+                 sprintf(adjust_param_int16_name_tmp, "%s %d", adjust_param_int16_name, adjust_param_int_core_temp);
+             },
+             nullptr},
+            {(uint8 *)"-10 val", []() {
+                 if (adjust_param_int_core_temp >= 10)
+                     adjust_param_int_core_temp -= 10;
+                 sprintf(adjust_param_int16_name_tmp, "%s %d", adjust_param_int16_name, adjust_param_int_core_temp);
+             },
+             nullptr},
+            {(uint8 *)"+100 val", []() {
+                 adjust_param_int_core_temp += 100;
+                 sprintf(adjust_param_int16_name_tmp, "%s %d", adjust_param_int16_name, adjust_param_int_core_temp);
+             },
+             nullptr},
+            {(uint8 *)"-100 val", []() {
+                 if (adjust_param_int_core_temp >= 100)
+                     adjust_param_int_core_temp -= 100;
+                 sprintf(adjust_param_int16_name_tmp, "%s %d", adjust_param_int16_name, adjust_param_int_core_temp);
+             },
+             nullptr}};
+    MENU_PRMT subMenu1_Prmt;
+    OLED_Clear();
+    uint8 menuNum = sizeof(subMenu1_Table) / sizeof(subMenu1_Table[0]); // 菜单项数
+    Menu_Process((uint8 *)adjust_param_int16_name_tmp, &subMenu1_Prmt, subMenu1_Table, menuNum);
+    ref = adjust_param_int_core_temp;
+}
+
 static char param_adjust_float_buf[64];
 static float adjust_param_float_core_temp;
 static char *param_name;
@@ -465,6 +517,14 @@ void param_adjust_menu() {
          },
          nullptr},
         {(uint8 *)"turn distance", turn_direction_adjust_menu, nullptr},
+        {(uint8 *)"target pos from", []() {
+             adjust_int16_param_menu_core("tar from", posture_tar_from_prob2);
+         },
+         nullptr},
+        {(uint8 *)"target pos to", []() {
+             adjust_int16_param_menu_core("tar to", posture_tar_to_prob3);
+         },
+         nullptr},
     };
     MENU_PRMT prmt;
     OLED_Clear();
@@ -540,7 +600,7 @@ void main_menu_start() {
             {(uint8 *)"adj parmas", param_adjust_menu, nullptr},
             {(uint8 *)"posture adj test", []() {
                  delay_ms(1000);
-                 posture_adjust_test(5);
+                 posture_adjust_test(posture_tar_from_prob2, posture_tar_to_prob3);
                  KeySan();
              },
              nullptr},
