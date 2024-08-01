@@ -32,8 +32,8 @@ float weight_mid = 0.07;
 uint16_t distance_adjust_after_leave_blackline = 2;
 constexpr uint32_t time_half_circle_need = 5 * 1000000;
 
-constexpr uint32_t half_circle_outside_distance = 8467 - 3419 - 100;
-constexpr uint32_t half_circle_inside_distance = 7100 - 3408 - 100;
+constexpr uint32_t half_circle_outside_distance = 8467 - 3419 - 200;
+constexpr uint32_t half_circle_inside_distance = 7100 - 3408 - 200;
 enum direction {
     LEFT,
     RIGHT
@@ -117,9 +117,22 @@ struct line_patrol_output {
 
 static constexpr uint32_t time_1s_us = 1000000;
 
+enum line_patrol_dir {
+    clockwise,        // 顺时针
+    counter_clockwise // 逆时针
+
+};
+
+struct line_patrol_input {
+    uint32_t starttime;
+    int32_t start_distance_L; // 开始巡线时左轮的编码器值，注意abs后使用
+    int32_t start_distance_R; // 开始巡线时右轮的编码器值，注意abs后使用
+    line_patrol_dir dir;
+};
+
 // 巡线核心
 // 输出量：scale
-line_patrol_output line_patrol_core(uint32_t starttime) {
+line_patrol_output line_patrol_core(line_patrol_input input) {
     line_patrol_output ret;
     ret.scale = 0;
     ret.stoped = false;
@@ -130,10 +143,27 @@ line_patrol_output line_patrol_core(uint32_t starttime) {
 
     i16 blackline_pos1 = get_sensor1_blackline_pos();
     i16 blackline_pos2 = get_sensor2_blackline_pos();
+    int32_t start_distance_inside, start_distance_outside;
+    int32_t now_distance_inside, now_distance_outside;
+    if (input.dir == counter_clockwise) {
+        // 逆时针，左轮是内，右轮是外
+        start_distance_inside = input.start_distance_L;
+        start_distance_outside = input.start_distance_R;
+        now_distance_inside = encoderA_get();
+        now_distance_outside = encoderB_get();
+    } else {
+        // 顺时针，左轮是外，右轮是内
+        start_distance_inside = input.start_distance_R;
+        start_distance_outside = input.start_distance_L;
+        now_distance_inside = encoderB_get();
+        now_distance_outside = encoderA_get();
+    }
 
     if (blackline_pos1 == -1) {
         // 未检测到黑线
-        if (starttime + time_1s_us < sys_cur_tick_us) {
+        if (input.starttime + time_1s_us < sys_cur_tick_us
+            && abs(now_distance_inside - start_distance_inside) > half_circle_inside_distance
+            && abs(now_distance_outside - start_distance_outside) > half_circle_outside_distance) {
             set_target_speed(0, 0);
             ret.stoped = true;
             return ret;
@@ -265,8 +295,13 @@ void go_problem2() {
     OLED_Refresh();
     disable_acclimit();
     uint32_t start_time_B = sys_cur_tick_us;
+    line_patrol_input input;
+    input.starttime = start_time_B;
+    input.start_distance_L = encoderA_get();
+    input.start_distance_R = encoderB_get();
+    input.dir = clockwise;
     while (true) {
-        auto ret = line_patrol_core(start_time_B);
+        auto ret = line_patrol_core(input);
         if (ret.stoped) {
             // 未检测到黑线
             // 可能已经到达了C点
@@ -337,8 +372,13 @@ void go_problem2() {
     OLED_Refresh();
     disable_acclimit();
     uint32_t start_time_D = sys_cur_tick_us;
+    line_patrol_input input2;
+    input2.starttime = start_time_D;
+    input2.start_distance_L = encoderA_get();
+    input2.start_distance_R = encoderB_get();
+    input2.dir = clockwise;
     while (true) {
-        auto ret = line_patrol_core(start_time_D);
+        auto ret = line_patrol_core(input2);
         if (ret.stoped) {
             // 未检测到黑线
             // 可能已经到达了A点
@@ -402,14 +442,19 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
             break;
         }
     }
-    // C-->B
+    // C-->B 逆时针
     // 寻迹
     disable_acclimit();
     uint32_t start_time_C = sys_cur_tick_us;
+    line_patrol_input input;
+    input.starttime = start_time_C;
+    input.start_distance_L = encoderA_get();
+    input.start_distance_R = encoderB_get();
+    input.dir = counter_clockwise;
     while (true) {
         constexpr int default_left_speed = inside_speed;
         constexpr int default_right_speed = outside_speed;
-        auto ret = line_patrol_core(start_time_C);
+        auto ret = line_patrol_core(input);
         if (ret.stoped) {
             // 未检测到黑线
             // 可能已经到达了A点
@@ -467,10 +512,16 @@ void go_problem3_inner_func(const int adj_A, const int adj_B) {
     // 寻迹
     disable_acclimit();
     uint32_t start_time_D = sys_cur_tick_us;
+    line_patrol_input input2;
+    input2.starttime = start_time_D;
+    input2.start_distance_L = encoderA_get();
+    input2.start_distance_R = encoderB_get();
+    input2.dir = clockwise;
+
     while (true) {
         constexpr int default_left_speed = outside_speed;
         constexpr int default_right_speed = inside_speed;
-        auto ret = line_patrol_core(start_time_D);
+        auto ret = line_patrol_core(input2);
         if (ret.stoped) {
             // 未检测到黑线
             // 可能已经到达了A点
