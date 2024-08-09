@@ -1,16 +1,33 @@
-## Example Summary
+# 2024电赛H题开源代码（只有省三，第四题寄啦）
 
-Empty project using DriverLib.
-This example shows a basic empty project using DriverLib with just main file
-and SysConfig initialization.
+## 有不懂的或者想问的，都可以开issue问
 
-### Low-Power Recommendations
-TI recommends to terminate unused pins by setting the corresponding functions to
-GPIO and configure the pins to output low or input with internal
-pullup/pulldown resistor.
+## MCU：MSPM0G3507
 
-SysConfig allows developers to easily configure unused pins by selecting **Board**→**Configure Unused Pins**.
+## 使用方法
+1.clone本项目
 
-## Example Usage
+2.在CCS Theia中导入本项目
 
-Compile, load and run the example.
+提示：导入后，可以找到ccs工作区，使用vscode打开本项目文件夹，安装clangd插件，将clangd路径设为ccs的clangd，修改compile_commands.json等，获得更好的开发体验。
+
+## 小车硬件简述
+小车为三轮小车，定义行进方向为小车前方。前方有两个驱动轮，由电机驱动，电机自带编码器。后方有一个万向轮。小车前部和中部各安装了一个八路灰度传感器（带mcu的，还好浙江赛区不禁止）。
+
+## 控制方案简述
+要求一：通过pid保持两个电机以相同的速度运动，使小车以直线运动。当小车前端检测到黑线时，停止车辆运动并发出声光提示。
+
+要求二：在黑线上寻迹，在离开线后走直线。
+
+要求三：在黑线上寻迹，脱离黑线后左轮或右轮单独转动一定距离，使得行进方向指向下一个点，然后走直线。车前的灰度传感器检测到黑线后寻迹。
+
+要求四：重复四遍要求三
+
+## 不使用陀螺仪的原因
+我们买的陀螺仪精度较差，小车转动360度，陀螺仪出现四五度的偏差。
+
+## 使用本MCU过程中踩的坑
+```C++
+DL_GPIO_writePins(BEEP_PORT, BEEP_PIN_PIN | LED_Board_LED0_PIN);
+```
+此行代码似乎会将BEEP_PORT端口下的BEEP_PIN和LED_PIN置1，**而剩下的端口置0**，不知道为什么。也正是因为这个原因，我们直接将驱动板上控制小车方向的引脚直接接了高电平或低电平，放弃了控制电机正反转。
